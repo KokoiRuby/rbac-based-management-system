@@ -1,0 +1,23 @@
+services:
+  consul:
+    build:
+      context: ./..
+      dockerfile: ./docker/consul/Dockerfile
+    container_name: consul
+    ports:
+      # HTTP API and UI port
+      - "8500:8500"
+      # DNS interface port
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    restart: unless-stopped
+    # sudo chown -R 1001:1001 ./docker/consul/data
+    # https://hub.docker.com/r/bitnami/consul/
+    volumes:
+      - ./consul/data:/bitnami
+    networks:
+      - rbac-be
+
+networks:
+  rbac-be:
+    driver: bridge

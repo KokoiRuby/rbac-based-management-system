@@ -1,0 +1,4 @@
+.idea/
+logs/
+backend/core/config/*/settings.yaml
+backend/docker/consul/data

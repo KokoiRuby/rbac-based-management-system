@@ -1,0 +1,1 @@
+FROM bitnami/consul:1.20.6
