@@ -15,4 +15,6 @@ func main() {
 	zap.L().Debug("DEBUG")
 	zap.L().Info("INFO")
 
+	select {}
+
 }
