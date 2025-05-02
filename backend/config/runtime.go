@@ -1,7 +1,12 @@
 package config
 
-import "github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
+import (
+	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
+)
 
 type RuntimeConfig struct {
-	Logging runtime.Logging `yaml:"logging"`
+	Logging runtime.Logging     `yaml:"logging"`
+	RDB     runtime.RDBConfig   `yaml:"rdb"`
+	Redis   runtime.RedisConfig `yaml:"redis"`
+	Mongo   runtime.MongoConfig `yaml:"mongo"`
 }

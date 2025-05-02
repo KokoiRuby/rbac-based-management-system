@@ -20,7 +20,7 @@ tidy:
 	go mod tidy
 
 run:
-	go run ./cmd/main.go
+	if [ -z "$LOGGING_ENV" ]; then export LOGGING_ENV="dev"; fi && go run ./cmd/main.go
 
 # Phony targets to avoid conflicts with files named 'up' or 'down'
 .PHONY: up down tidy run

@@ -1,4 +1,5 @@
 .idea/
 logs/
-backend/core/config/*/settings.yaml
+backend/config/settings.yaml
 backend/docker/consul/data
+backend/rbac_mgmt_system.db
