@@ -11,13 +11,43 @@ services:
       # DNS interface port
       - "8600:8600/tcp"
       - "8600:8600/udp"
-    restart: unless-stopped
+    healthcheck:
+      test: "consul status leader"
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: always
     # sudo chown -R 1001:1001 ./docker/consul/data
     # https://hub.docker.com/r/bitnami/consul/
     volumes:
       - ./consul/data:/bitnami
     networks:
       - rbac-be
+
+  mysql:
+    build:
+      context: ./..
+      dockerfile: ./docker/mysql/Dockerfile
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: "mysql -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} $${MYSQL_DATABASE} -e 'SELECT 1'"
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: always
+    volumes:
+      # MySQL automatically executes all .sql files in this directory during initialization
+      - ./../docker/mysql/fixtures:/docker-entrypoint-initdb.d
+      # sudo chown -R 1001:1001 ./docker/mysql/data
+      # https://hub.docker.com/r/bitnami/mysql
+      - ./mysql/data:/bitnami/mysql/data
+    networks:
+      - rbac-be
+
 
 networks:
   rbac-be:
