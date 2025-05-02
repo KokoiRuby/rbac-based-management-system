@@ -16,5 +16,11 @@ down:
 	$(DOCKER_COMPOSE) down
 	@echo "Consul container stopped and removed."
 
+tidy:
+	go mod tidy
+
+run:
+	go run ./cmd/main.go
+
 # Phony targets to avoid conflicts with files named 'up' or 'down'
-.PHONY: up down
+.PHONY: up down tidy run

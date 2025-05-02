@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
@@ -106,11 +107,14 @@ func (e *logEncoder) EncodeEntry(entry zapcore.Entry, fields []zapcore.Field) (*
 	return buf, nil
 }
 
-func Init() {
+func InitLogger() error {
 
-	env := viper.GetString("logging.env")
+	viper.AutomaticEnv()
+
+	// export LOGGING_ENV="dev|prod"
+	env := viper.GetString("LOGGING_ENV")
 	if env == "" {
-		panic("The [env] is required in the [logging] section of the configuration file.")
+		return errors.New("environment variable [LOGGING_ENV] not set")
 	}
 
 	switch {
@@ -126,9 +130,10 @@ func Init() {
 		zap.ReplaceGlobals(logger)
 
 	case strings.HasPrefix(env, "prod"):
-		dir := viper.GetString("logging.dir")
+		// export LOGGING_DIR="./logs"
+		dir := viper.GetString("LOGGING_DIR")
 		if dir == "" {
-			panic("The [dir] is required in the [logging] section of the configuration file.")
+			return errors.New("environment variable [LOGGING_ENV] not set")
 		}
 
 		cfg := zap.NewProductionConfig()
@@ -148,6 +153,9 @@ func Init() {
 		zap.ReplaceGlobals(logger)
 
 	default:
-		panic("Invalid configuration in logging section")
+		return errors.New("invalid environment variable [LOGGING_ENV] set")
 	}
+	return nil
 }
+
+// TODO: Change log level in runtime
