@@ -2,13 +2,13 @@ package utils
 
 import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
-func MigrateToRDB() {
-	err := global.RDB.AutoMigrate(
+func MigrateToRDB(db *gorm.DB) {
+	err := db.AutoMigrate(
 		&model.User{},
 		&model.Role{},
 		&model.UserRoleBinding{},
@@ -22,6 +22,5 @@ func MigrateToRDB() {
 		zap.S().Fatalf("Failed to migrate RDB table: %v", err)
 		return
 	}
-	close(global.MigrationDone)
 	zap.S().Info("Migrated to RDB table successfully")
 }

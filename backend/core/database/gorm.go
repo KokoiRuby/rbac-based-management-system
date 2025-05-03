@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
 	"go.uber.org/zap"
@@ -11,11 +10,11 @@ import (
 	"time"
 )
 
-func NewGormDB(cfg runtime.RDBConfig) (*gorm.DB, error) {
+func NewRDB(cfg runtime.RDBConfig) *gorm.DB {
 
 	dialector := cfg.GetDSN()
 	if dialector == nil {
-		return nil, errors.New("failed to get dialector")
+		zap.S().Fatal("database dialector is nil")
 	}
 
 	// Open initialize db session based on dialector
@@ -23,18 +22,18 @@ func NewGormDB(cfg runtime.RDBConfig) (*gorm.DB, error) {
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		return nil, err
+		zap.S().Fatalf("failed to initialize database connection: %v", err)
 	}
 
 	// Get DB connection pool
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, err
+		zap.S().Fatalf("failed to get sql database: %v", err)
 	}
 	// Ping to verify initial connection
 	err = sqlDB.Ping()
 	if err != nil {
-		return nil, err
+		zap.S().Fatalf("failed to ping database: %v", err)
 	}
 	global.Readiness.Store("rdb", true)
 
@@ -50,7 +49,7 @@ func NewGormDB(cfg runtime.RDBConfig) (*gorm.DB, error) {
 	go heartBeatRDB(context.Background(), sqlDB, cfg)
 
 	zap.S().Infof("Connected to RDB successfully")
-	return db, nil
+	return db
 }
 
 func heartBeatRDB(ctx context.Context, db *sql.DB, cfg runtime.RDBConfig) {
@@ -58,7 +57,7 @@ func heartBeatRDB(ctx context.Context, db *sql.DB, cfg runtime.RDBConfig) {
 	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	defer ticker.Stop()
 
-	zap.S().Debugf("Starting heartbeat to RDB with interval %v", interval)
+	zap.S().Debugf("Starting heartbeat to RDB with interval %vs", interval)
 
 	for {
 		select {

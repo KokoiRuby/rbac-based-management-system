@@ -1,60 +1,39 @@
 package main
 
 import (
-	"github.com/KokoiRuby/rbac-based-management-system/backend/core/config"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/core/database"
+	"context"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/core/bootstrap"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/core/lifecycle"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/logging"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/core/rbac"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"go.uber.org/zap"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 )
 
+var (
+	wg        sync.WaitGroup
+	Readiness sync.Map
+)
+
 func main() {
+	// Context for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	err := logging.InitLogger()
 	if err != nil {
 		panic(err)
 	}
 
-	err = config.ParseLoadRun()
-	if err != nil {
-		panic(err)
-	}
+	app := bootstrap.NewApp(ctx)
 
-	go func() {
-		global.RDB, err = database.NewGormDB(global.RuntimeConfig.RDB)
-		if err != nil {
-			panic(err)
-		}
-		close(global.RDBReady) // Signal when instance is set
-	}()
-
-	go func() {
-		global.Redis, err = database.NewRedisClient(global.RuntimeConfig.Redis)
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	go func() {
-		global.Mongo, err = database.NewMongoClient(global.RuntimeConfig.Mongo)
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	go func() {
-		global.Casbin, err = rbac.InitCasbin()
-		if err != nil {
-			panic(err)
-		}
-	}()
-
+	// Readiness probe
 	go func() {
 		for {
-			if utils.IsReady() {
+			if lifecycle.IsReady() {
 				zap.S().Debug("Ready")
 			} else {
 				zap.S().Debug("Not Ready")
@@ -63,6 +42,16 @@ func main() {
 		}
 	}()
 
-	select {}
+	// Graceful shutdown
+	signal.Notify(lifecycle.SigChan, syscall.SIGINT, syscall.SIGTERM)
+	go lifecycle.GracefulShutdown(app, cancel)
 
+	zap.S().Info("Program running. Press Ctrl+C to trigger graceful shutdown...")
+	select {
+	case <-lifecycle.ShutDownChan:
+		zap.S().Info("Graceful shutdown completed.")
+		os.Exit(0)
+	case <-time.After(30 * time.Second):
+		zap.S().Info("Program timeout, exiting...")
+	}
 }

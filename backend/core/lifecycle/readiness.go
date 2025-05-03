@@ -1,6 +1,8 @@
-package utils
+package lifecycle
 
-import "github.com/KokoiRuby/rbac-based-management-system/backend/global"
+import (
+	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
+)
 
 func IsReady() bool {
 	ready := true

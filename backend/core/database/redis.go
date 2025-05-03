@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func NewRedisClient(cfg runtime.RedisConfig) (*redis.Client, error) {
+func NewRedisClient(ctx context.Context, cfg runtime.RedisConfig) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pass,
@@ -17,21 +17,21 @@ func NewRedisClient(cfg runtime.RedisConfig) (*redis.Client, error) {
 	})
 
 	// Ping to verify initial connection
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.PingTimeout)*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, time.Duration(cfg.PingTimeout)*time.Second)
 	defer cancel()
 
-	_, err := client.Ping(ctx).Result()
+	_, err := client.Ping(pingCtx).Result()
 	if err != nil {
-		return nil, err
+		zap.S().Warnf("Failed to ping Redis: %v", err)
 	}
 	global.Readiness.Store("redis", true)
 
 	// Start a goroutine for heartbeat
 	// TODO: Backoff by factor
-	go heartBeatRedis(context.Background(), client, cfg)
+	go heartBeatRedis(ctx, client, cfg)
 
 	zap.S().Info("Connected to Redis successfully")
-	return client, nil
+	return client
 }
 
 func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.RedisConfig) {
@@ -39,7 +39,7 @@ func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.Redis
 	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	defer ticker.Stop()
 
-	zap.S().Debugf("Starting heartbeat to Redis with interval %v", interval)
+	zap.S().Debugf("Starting heartbeat to Redis with interval %vs", interval)
 
 	for {
 		select {
@@ -59,5 +59,19 @@ func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.Redis
 			zap.S().Debugf("Stopping heartbeat to Redis due to context cancellation")
 			return
 		}
+	}
+}
+
+func CloseRedisConnection(client *redis.Client) error {
+	if client != nil {
+		if err := client.Close(); err != nil {
+			return err
+		} else {
+			zap.S().Info("Redis connection closed")
+			return nil
+		}
+	} else {
+		zap.S().Warn("Redis client was nil, skipping close.")
+		return nil
 	}
 }
