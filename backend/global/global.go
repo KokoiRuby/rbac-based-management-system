@@ -2,6 +2,7 @@ package global
 
 import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
+	"github.com/casbin/casbin/v2"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -15,9 +16,10 @@ type Ready bool
 var (
 	RuntimeConfig *config.RuntimeConfig
 
-	RDB   *gorm.DB
-	Redis *redis.Client
-	Mongo *mongo.Client
+	RDB    *gorm.DB
+	Redis  *redis.Client
+	Mongo  *mongo.Client
+	Casbin *casbin.CachedEnforcer
 
 	// Readiness
 	// map is not inherently thread-safe for concurrent access from multiple goroutines.

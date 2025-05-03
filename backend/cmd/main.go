@@ -4,6 +4,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/database"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/logging"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/core/rbac"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"go.uber.org/zap"
@@ -39,6 +40,13 @@ func main() {
 
 	go func() {
 		global.Mongo, err = database.NewMongoClient(global.RuntimeConfig.Mongo)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	go func() {
+		global.Casbin, err = rbac.InitCasbin()
 		if err != nil {
 			panic(err)
 		}

@@ -7,6 +7,7 @@ type User struct {
 	Nickname string `gorm:"size:256" json:"nickname,omitempty"`
 	Avatar   string `gorm:"size:256" json:"avatar,omitempty"`
 	Email    string `gorm:"size:128" json:"email,omitempty"` // Assuming email is optional
+	IsAdmin  bool   `gorm:"default:false" json:"is_admin"`
 
 	// One user can have many roles
 	// https://gorm.io/docs/many_to_many.html

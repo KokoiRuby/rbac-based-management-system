@@ -40,10 +40,12 @@ services:
       start_period: 10s
     restart: always
     volumes:
-      # MySQL automatically executes all .sql files in this directory during initialization
-      # - ./../docker/mysql/fixtures:/docker-entrypoint-initdb.d
+      # MySQL automatically executes all .sql files in this directory during initialization only
+      - ./../docker/mysql/fixtures:/docker-entrypoint-initdb.d
       # sudo chown -R 1001:1001 ./docker/mysql/data
       # https://hub.docker.com/r/bitnami/mysql
+      # Remember to change back when run go mod tidy
+      # sudo chown -R $USER:$USER ./docker/mysql/data
       - ./mysql/data:/bitnami/mysql/data
     networks:
       - rbac-be
