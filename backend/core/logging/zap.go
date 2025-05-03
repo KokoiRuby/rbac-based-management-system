@@ -111,10 +111,10 @@ func InitLogger() error {
 
 	viper.AutomaticEnv()
 
-	// export LOGGING_ENV="dev|prod"
-	env := viper.GetString("LOGGING_ENV")
+	// export ENV="dev|prod"
+	env := viper.GetString("ENV")
 	if env == "" {
-		return errors.New("environment variable [LOGGING_ENV] not set")
+		return errors.New("environment variable [ENV] not set")
 	}
 
 	switch {
@@ -133,7 +133,7 @@ func InitLogger() error {
 		// export LOGGING_DIR="./logs"
 		dir := viper.GetString("LOGGING_DIR")
 		if dir == "" {
-			return errors.New("environment variable [LOGGING_ENV] not set")
+			return errors.New("environment variable [ENV] not set")
 		}
 
 		cfg := zap.NewProductionConfig()
@@ -153,7 +153,7 @@ func InitLogger() error {
 		zap.ReplaceGlobals(logger)
 
 	default:
-		return errors.New("invalid environment variable [LOGGING_ENV] set")
+		return errors.New("invalid environment variable [ENV] set")
 	}
 	return nil
 }

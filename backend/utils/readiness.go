@@ -3,12 +3,14 @@ package utils
 import "github.com/KokoiRuby/rbac-based-management-system/backend/global"
 
 func IsReady() bool {
-	flag := true
-	for _, ready := range global.Readiness {
-		if !ready {
-			flag = false
-			break
+	ready := true
+	global.Readiness.Range(func(key, value interface{}) bool {
+		isReady, ok := value.(bool) // Assert the type of the value
+		if !ok || !isReady {
+			ready = false
+			return false // Stop the iteration early if any value is false
 		}
-	}
-	return flag
+		return true // Continue iterating
+	})
+	return ready
 }

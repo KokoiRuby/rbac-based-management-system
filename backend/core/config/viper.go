@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/fsnotify/fsnotify"
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/spf13/pflag"
@@ -16,9 +17,20 @@ import (
 
 const backendConfigKey = "backend/config"
 
-var conf = pflag.StringP("config", "f", "./config/settings.yaml", "Configuration file")
+type Flags struct {
+	ConfigFile  string
+	AutoMigrate bool
+}
+
+var flags Flags
 
 func Parse() error {
+
+	pflag.StringVarP(&flags.ConfigFile,
+		"config", "f", "./config/settings.yaml", "Configuration file")
+	pflag.BoolVarP(&flags.AutoMigrate,
+		"migrate", "m", false, "Auto migrate models to RDB") // When RDB is ready
+
 	pflag.Parse()
 	err := viper.BindPFlags(pflag.CommandLine)
 	if err != nil {
@@ -32,9 +44,9 @@ func Parse() error {
 // the configurations should be injected to the configuration registry before application starts.
 // At the dev stage, directly update in consul gui once key is persisted.
 // TODO: Best practice in production?!
-// TODO: struct-ize configuration?!
-// TODO: It's necessary when we dump in-mem config for persistence in case remote failure.
 func Load() error {
+
+	// TODO: Read local if -f flag is used
 
 	client := NewConsulClient()
 
@@ -54,7 +66,7 @@ func Load() error {
 
 	// Put if no key in remote
 	if kvPair == nil {
-		bytes, err := os.ReadFile(*conf)
+		bytes, err := os.ReadFile(flags.ConfigFile)
 		if err != nil {
 			return err
 		}
@@ -131,7 +143,7 @@ func Load() error {
 	return nil
 }
 
-func ParseAndLoad() error {
+func ParseLoadRun() error {
 	err := Parse()
 	if err != nil {
 		return err
@@ -140,6 +152,7 @@ func ParseAndLoad() error {
 	if err != nil {
 		return err
 	}
+	go Run() // Start a goroutine to handle flags
 	return nil
 }
 
@@ -149,11 +162,20 @@ func Dump() error {
 		zap.S().Errorf("fail to dump config: %s", err)
 		return err
 	}
-	err = os.WriteFile(*conf, byteData, 0644)
+	err = os.WriteFile(flags.ConfigFile, byteData, 0644)
 	if err != nil {
 		zap.S().Errorf("fail to dump config: %s", err)
 		return err
 	}
 	//zap.S().Debugf("Dump config to %v successfully", *conf)
 	return nil
+}
+
+// Run flags
+func Run() {
+	if flags.AutoMigrate {
+		<-global.RDBReady
+		utils.MigrateToRDB()
+		os.Exit(0)
+	}
 }

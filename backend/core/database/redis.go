@@ -24,6 +24,7 @@ func NewRedisClient(cfg runtime.RedisConfig) (*redis.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	global.Readiness.Store("redis", true)
 
 	// Start a goroutine for heartbeat
 	// TODO: Backoff by factor
@@ -49,10 +50,10 @@ func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.Redis
 			_, err := client.Ping(pingCtx).Result()
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat Redis: %v", err)
-				global.Readiness["redis"] = false
+				global.Readiness.Swap("redis", false)
 			}
 			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness["redis"] = true
+			global.Readiness.CompareAndSwap("redis", false, true)
 
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to Redis due to context cancellation")

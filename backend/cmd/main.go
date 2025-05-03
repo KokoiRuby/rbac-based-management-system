@@ -17,25 +17,32 @@ func main() {
 		panic(err)
 	}
 
-	err = config.ParseAndLoad()
+	err = config.ParseLoadRun()
 	if err != nil {
 		panic(err)
 	}
 
-	global.RDB, err = database.NewGormDB(global.RuntimeConfig.RDB)
-	if err != nil {
-		panic(err)
-	}
+	go func() {
+		global.RDB, err = database.NewGormDB(global.RuntimeConfig.RDB)
+		if err != nil {
+			panic(err)
+		}
+		close(global.RDBReady) // Signal when instance is set
+	}()
 
-	global.Redis, err = database.NewRedisClient(global.RuntimeConfig.Redis)
-	if err != nil {
-		panic(err)
-	}
+	go func() {
+		global.Redis, err = database.NewRedisClient(global.RuntimeConfig.Redis)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
-	global.Mongo, err = database.NewMongoClient(global.RuntimeConfig.Mongo)
-	if err != nil {
-		panic(err)
-	}
+	go func() {
+		global.Mongo, err = database.NewMongoClient(global.RuntimeConfig.Mongo)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	go func() {
 		for {

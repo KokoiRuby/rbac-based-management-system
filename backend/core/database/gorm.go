@@ -36,6 +36,7 @@ func NewGormDB(cfg runtime.RDBConfig) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	global.Readiness.Store("rdb", true)
 
 	// Connection Pool
 	// https://gorm.io/docs/generic_interface.html#Connection-Pool
@@ -65,10 +66,10 @@ func heartBeatRDB(ctx context.Context, db *sql.DB, cfg runtime.RDBConfig) {
 			err := db.Ping()
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat RDB: %v", err)
-				global.Readiness["rdb"] = false
+				global.Readiness.Swap("rdb", false)
 			}
 			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness["rdb"] = true
+			global.Readiness.CompareAndSwap("rdb", false, true)
 
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to RDB due to context cancellation")

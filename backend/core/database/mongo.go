@@ -36,6 +36,7 @@ func NewMongoClient(cfg runtime.MongoConfig) (*mongo.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	global.Readiness.Store("mongo", true)
 
 	// Start a goroutine for heartbeat
 	// TODO: Backoff by factor
@@ -61,10 +62,10 @@ func heartBeatMongo(ctx context.Context, client *mongo.Client, cfg runtime.Mongo
 			err := client.Ping(pingCtx, nil)
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat MongoDB: %v", err)
-				global.Readiness["mongo"] = false
+				global.Readiness.Swap("mongo", false)
 			}
 			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness["mongo"] = true
+			global.Readiness.CompareAndSwap("mongo", false, true)
 
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to MongoDB due to context cancellation")
