@@ -1,8 +1,12 @@
 PROJECT_NAME = rbac-mgmt-system
 DOCKER_COMPOSE = docker compose -f ./docker/docker-compose.yaml -p $(PROJECT_NAME)
 
+.PHONY: build
+build:
+	$(DOCKER_COMPOSE) build
+
 .PHONY: up
-up:
+up: build
 	$(DOCKER_COMPOSE) up -d
 	@echo "Access Consul UI at http://localhost:8500"
 
@@ -34,7 +38,7 @@ ssl:
 		  -ca ssl/certs/ca.pem \
 		  -ca-key ssl/certs/ca-key.pem \
 		  -config ssl/ca-config.json \
-		  ssl/gin-csr.json | cfssljson -bare ssl/certs/gin
+		  ssl/gin-csr.json | cfssljson -bare ssl/certs/gin/gin
 
 .PHONY: clean
 clean:

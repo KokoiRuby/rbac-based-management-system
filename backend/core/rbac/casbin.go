@@ -12,7 +12,8 @@ func NewCasbin(db *gorm.DB) *casbin.CachedEnforcer {
 	a, _ := gormadapter.NewAdapterByDB(db)
 	m, err := model.NewModelFromFile("./core/rbac/rbac.pml")
 	if err != nil {
-		zap.S().Fatalf("Failed to create model from file: %v", err)
+		zap.S().Errorf("Failed to create model from file: %v", err)
+		return nil
 	}
 
 	e, err := casbin.NewCachedEnforcer(m, a)

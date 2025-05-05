@@ -5,16 +5,18 @@ services:
       dockerfile: ./docker/Dockerfile
     container_name: app
     ports:
-      - "8080:8080"
+      - "8443:8443"
     environment:
       ENV: dev
-      TLS_CERT: "/etc/tls/certs/gin.pem"
-      TLS_KEY: "/etc/tls/certs/gin-key.pem"
-    healthcheck:
-      test: "curl -f http://localhost:8080/readiness || exit 1"
-      interval: 20s
-      timeout: 3s
-      retries: 5
+      TLS_CERT: "./ssl/gin/gin.pem"
+      TLS_KEY: "./ssl/gin/gin-key.pem"
+      CONSUL_HTTP_ADDR: http://consul:8500
+      GIN_MODE: "release"
+    volumes:
+      - ../config/settings.yaml:/app/config/settings.yaml
+      - ../core/rbac/rbac.pml:/app/core/rbac/rbac.pml
+      - ../static/uploads:/app/static/uploads
+      - ../ssl/certs/gin:/app/ssl/gin
     networks:
       - rbac-be
     depends_on:
@@ -35,8 +37,7 @@ services:
       - "8600:8600/tcp"
       - "8600:8600/udp"
     healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/health/state/passing"] # no curl in container
-      test: "consul members | grep alive"
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/health/state/passing"]
       interval: 5s
       timeout: 3s
       retries: 3

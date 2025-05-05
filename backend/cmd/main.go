@@ -30,18 +30,18 @@ func main() {
 
 	go func() {
 		if app.RuntimeConfig.Gin.TLS {
+			certFile := "./ssl/gin/gin.pem"
+			keyFile := "./ssl/gin/gin-key.pem"
+
 			if app.RuntimeConfig.Gin.MTLS {
-				// TODO
+				// TODO: MTLS
 			}
-			certFile := "./tls/certs/gin.pem"
-			keyFile := "./tls/certs/gin-key.pem"
 
 			g := gin.Default()
 			route.Setup(app, g)
 			err := g.RunTLS(app.RuntimeConfig.Gin.Addr(), certFile, keyFile) // Blocked
 			if err != nil {
 				zap.S().Fatalf("Failed to start Gin server: %v", err)
-				return
 			}
 		}
 		g := gin.Default()
@@ -49,7 +49,6 @@ func main() {
 		err = g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
 		if err != nil {
 			zap.S().Fatalf("Failed to start Gin server: %v", err)
-			return
 		}
 	}()
 

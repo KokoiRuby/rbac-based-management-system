@@ -58,7 +58,7 @@ func NewRuntimeConfig() *RuntimeConfig {
 
 	// Key is in remote
 	// TODO: env-ize endpoint when app is containerized in the future
-	err = viper.AddRemoteProvider("consul", "localhost:8500", backendConfigKey)
+	err = viper.AddRemoteProvider("consul", viper.GetString("CONSUL_HTTP_ADDR"), backendConfigKey)
 	if err != nil {
 		zap.S().Fatalf("failed to add remote provider: %s", err)
 	}
