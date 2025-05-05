@@ -1,4 +1,4 @@
-module github.com/KokoiRuby/rbac-based-management-system
+module github.com/KokoiRuby/rbac-based-management-system/backend
 
 go 1.23.2
 
