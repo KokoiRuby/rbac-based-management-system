@@ -62,11 +62,10 @@ func heartBeatMongo(ctx context.Context, client *mongo.Client, cfg runtime.Mongo
 			err := client.Ping(pingCtx, nil)
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat MongoDB: %v", err)
-				global.Readiness.Swap("mongo", false)
+				global.Readiness.CompareAndSwap("mongo", true, false)
+			} else {
+				global.Readiness.CompareAndSwap("mongo", false, true)
 			}
-			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness.CompareAndSwap("mongo", false, true)
-
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to MongoDB due to context cancellation")
 			return

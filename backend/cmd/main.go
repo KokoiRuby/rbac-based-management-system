@@ -2,24 +2,19 @@ package main
 
 import (
 	"context"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/api/route"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/bootstrap"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/lifecycle"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/logging"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 )
 
-var (
-	wg        sync.WaitGroup
-	Readiness sync.Map
-)
-
 func main() {
-	// Context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -30,28 +25,25 @@ func main() {
 
 	app := bootstrap.NewApp(ctx)
 
-	// Readiness probe
-	go func() {
-		for {
-			if lifecycle.IsReady() {
-				zap.S().Debug("Ready")
-			} else {
-				zap.S().Debug("Not Ready")
-			}
-			time.Sleep(3 * time.Second)
-		}
-	}()
-
-	// Graceful shutdown
 	signal.Notify(lifecycle.SigChan, syscall.SIGINT, syscall.SIGTERM)
 	go lifecycle.GracefulShutdown(app, cancel)
+
+	go func() {
+		g := gin.Default()
+		route.Setup(app, g)
+		err = g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
+		if err != nil {
+			zap.S().Fatalf("Failed to start Gin server: %v", err)
+			return
+		}
+	}()
 
 	zap.S().Info("Program running. Press Ctrl+C to trigger graceful shutdown...")
 	select {
 	case <-lifecycle.ShutDownChan:
 		zap.S().Info("Graceful shutdown completed.")
 		os.Exit(0)
-	case <-time.After(30 * time.Second):
+	case <-time.After(5 * time.Minute):
 		zap.S().Info("Program timeout, exiting...")
 	}
 }

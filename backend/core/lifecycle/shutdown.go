@@ -14,7 +14,6 @@ var (
 )
 
 func GracefulShutdown(app *bootstrap.App, cancel context.CancelFunc) {
-
 	sig := <-SigChan
 	zap.S().Infof("Received signal: %v. Shutting down...", sig)
 	cancel() // Call cancel to signal all goroutines to stop

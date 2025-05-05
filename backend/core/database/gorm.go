@@ -65,11 +65,10 @@ func heartBeatRDB(ctx context.Context, db *sql.DB, cfg runtime.RDBConfig) {
 			err := db.Ping()
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat RDB: %v", err)
-				global.Readiness.Swap("rdb", false)
+				global.Readiness.CompareAndSwap("rdb", true, false)
+			} else {
+				global.Readiness.CompareAndSwap("rdb", false, true)
 			}
-			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness.CompareAndSwap("rdb", false, true)
-
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to RDB due to context cancellation")
 			return

@@ -50,11 +50,10 @@ func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.Redis
 			_, err := client.Ping(pingCtx).Result()
 			if err != nil {
 				zap.S().Warnf("Failed to heartbeat Redis: %v", err)
-				global.Readiness.Swap("redis", false)
+				global.Readiness.CompareAndSwap("redis", true, false)
+			} else {
+				global.Readiness.CompareAndSwap("redis", false, true)
 			}
-			//zap.S().Debugf("Heartbeat to Redis successful")
-			global.Readiness.CompareAndSwap("redis", false, true)
-
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to Redis due to context cancellation")
 			return

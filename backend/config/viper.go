@@ -25,7 +25,8 @@ type RuntimeConfig struct {
 	RDB     runtime.RDBConfig   `yaml:"rdb"`
 	Redis   runtime.RedisConfig `yaml:"redis"`
 	Mongo   runtime.MongoConfig `yaml:"mongo"`
-	Flags   Flags               // As member not embedded
+	Gin     runtime.GinConfig   `yaml:"gin"`
+	Flags   Flags               `yaml:"-"` // As member not embedded
 }
 
 func NewRuntimeConfig() *RuntimeConfig {
