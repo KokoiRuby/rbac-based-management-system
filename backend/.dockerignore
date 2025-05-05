@@ -1,0 +1,6 @@
+config/settings.yaml
+docker/
+ssl/
+.dockerignore
+Makefile
+

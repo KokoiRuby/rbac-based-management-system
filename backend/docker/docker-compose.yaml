@@ -1,5 +1,26 @@
 services:
-  # TODO: TLS and HA
+  app:
+    build:
+      context: ./..
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      TLS_CERT: "/etc/tls/certs/gin.pem"
+      TLS_KEY: "/etc/tls/certs/gin-key.pem"
+    healthcheck:
+      test: "curl -f http://localhost:8080/readiness || exit 1"
+      interval: 20s
+      timeout: 3s
+      retries: 5
+    networks:
+      - rbac-be
+    depends_on:
+      consul:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+
   consul:
     build:
       context: ./..

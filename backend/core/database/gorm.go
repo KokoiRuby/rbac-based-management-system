@@ -71,6 +71,7 @@ func heartBeatRDB(ctx context.Context, db *sql.DB, cfg runtime.RDBConfig) {
 			}
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to RDB due to context cancellation")
+			global.Readiness.CompareAndSwap("rdb", true, false)
 			return
 		}
 	}

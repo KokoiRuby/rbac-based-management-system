@@ -16,8 +16,6 @@ import (
 	"sync"
 )
 
-var Readiness sync.Map
-
 type App struct {
 	RuntimeConfig *config.RuntimeConfig
 	RDB           *gorm.DB
@@ -84,3 +82,28 @@ func (app *App) CloseConnection(ctx context.Context) error {
 	zap.S().Info("All connections closed")
 	return nil
 }
+
+//func (app *App) Start() {
+//	if app.RuntimeConfig.Gin.TLS {
+//		if app.RuntimeConfig.Gin.MTLS {
+//			// TODO
+//		}
+//		certFile := "./tls/certs/gin.pem"
+//		keyFile := "./tls/certs/gin-key.pem"
+//
+//		g := gin.Default()
+//		route.Setup(app, g)
+//		err := g.RunTLS(app.RuntimeConfig.Gin.Addr(), certFile, keyFile) // Blocked
+//		if err != nil {
+//			zap.S().Fatalf("Failed to start Gin server: %v", err)
+//			return
+//		}
+//	}
+//	g := gin.Default()
+//	route.Setup(app, g)
+//	err := g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
+//	if err != nil {
+//		zap.S().Fatalf("Failed to start Gin server: %v", err)
+//		return
+//	}
+//}

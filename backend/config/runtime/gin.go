@@ -2,13 +2,14 @@ package runtime
 
 import (
 	"fmt"
-	"time"
 )
 
 type GinConfig struct {
-	IP      string        `yaml:"ip"`
-	Port    string        `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
+	IP      string `yaml:"ip"`
+	Port    string `yaml:"port"`
+	Timeout uint   `yaml:"timeout"`
+	TLS     bool   `yaml:"tls"`
+	MTLS    bool   `yaml:"mtls"`
 }
 
 func (g GinConfig) Addr() string {

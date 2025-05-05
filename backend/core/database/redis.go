@@ -56,6 +56,7 @@ func heartBeatRedis(ctx context.Context, client *redis.Client, cfg runtime.Redis
 			}
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to Redis due to context cancellation")
+			global.Readiness.CompareAndSwap("redis", true, false)
 			return
 		}
 	}

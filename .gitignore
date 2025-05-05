@@ -5,3 +5,4 @@ backend/docker/consul/data
 backend/docker/mysql/data
 backend/rbac_mgmt_system.db
 backend/core/backoff.go
+backend/ssl/certs

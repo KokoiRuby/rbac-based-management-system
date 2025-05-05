@@ -68,6 +68,7 @@ func heartBeatMongo(ctx context.Context, client *mongo.Client, cfg runtime.Mongo
 			}
 		case <-ctx.Done():
 			zap.S().Debugf("Stopping heartbeat to MongoDB due to context cancellation")
+			global.Readiness.CompareAndSwap("mongo", true, false)
 			return
 		}
 	}

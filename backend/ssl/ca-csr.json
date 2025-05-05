@@ -1,0 +1,16 @@
+{
+  "CN": "Self-signed CA",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "O": "Organization",
+      "OU": "Organization Unit",
+      "L": "Location",
+      "ST": "State",
+      "C": "Country"
+    }
+  ]
+}
