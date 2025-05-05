@@ -30,6 +30,7 @@ type RuntimeConfig struct {
 }
 
 func NewRuntimeConfig() *RuntimeConfig {
+	viper.AutomaticEnv()
 
 	cfg := &RuntimeConfig{}
 	Parse(cfg)

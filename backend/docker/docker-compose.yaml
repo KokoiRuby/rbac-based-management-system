@@ -3,9 +3,11 @@ services:
     build:
       context: ./..
       dockerfile: ./docker/Dockerfile
+    container_name: app
     ports:
       - "8080:8080"
     environment:
+      ENV: dev
       TLS_CERT: "/etc/tls/certs/gin.pem"
       TLS_KEY: "/etc/tls/certs/gin-key.pem"
     healthcheck:
@@ -33,7 +35,8 @@ services:
       - "8600:8600/tcp"
       - "8600:8600/udp"
     healthcheck:
-      test: "consul status leader"
+#      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/health/state/passing"] # no curl in container
+      test: "consul members | grep alive"
       interval: 5s
       timeout: 3s
       retries: 3
