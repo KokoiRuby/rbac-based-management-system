@@ -68,11 +68,11 @@ func (handler *SignupHandler) Signup(c *gin.Context) {
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")
 	}
 
-	signupResponse := model.SignupResponse{
+	resp := model.SignupResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
 
-	utils.OKWithData(c, http.StatusOK, signupResponse)
+	utils.OKWithData(c, http.StatusOK, resp)
 	return
 }

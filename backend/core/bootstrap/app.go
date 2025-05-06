@@ -113,18 +113,18 @@ func (app *App) Start(ctx context.Context) {
 
 		// Wait for dependencies
 		<-RDBReady
-		//<-RedisReady
+		<-RedisReady
 		//<-MongoReady
 
 		g := gin.Default()
-		route.Setup(app.RuntimeConfig, app.RDB, g)
+		route.Setup(app.RuntimeConfig, app.RDB, app.Redis, g)
 		err := g.RunTLS(app.RuntimeConfig.Gin.Addr(), certFile, keyFile) // Blocked
 		if err != nil {
 			zap.S().Fatalf("Failed to start Gin server: %v", err)
 		}
 	}
 	g := gin.Default()
-	route.Setup(app.RuntimeConfig, app.RDB, g)
+	route.Setup(app.RuntimeConfig, app.RDB, app.Redis, g)
 	err := g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
 	if err != nil {
 		zap.S().Fatalf("Failed to start Gin server: %v", err)

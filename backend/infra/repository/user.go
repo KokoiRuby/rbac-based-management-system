@@ -33,9 +33,16 @@ func (u userRDB) List(c context.Context) ([]model.User, error) {
 	panic("implement me")
 }
 
-func (u userRDB) GetByID(c context.Context, id string) (model.User, error) {
-	//TODO implement me
-	panic("implement me")
+func (u userRDB) GetByID(c context.Context, id uint) (model.User, error) {
+	query.SetDefault(u.rdb)
+	user, err := query.User.Where(query.User.ID.Eq(id)).Take()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.User{}, err
+		}
+		return model.User{}, err
+	}
+	return *user, nil
 }
 
 func (u userRDB) GetByEmail(c context.Context, email string) (model.User, error) {

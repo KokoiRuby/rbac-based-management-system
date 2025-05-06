@@ -4,6 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type status int
+type code int
+
+var statusToCode = map[status]code{}
+
 type Response struct {
 	Code    int    `json:"code"`
 	Data    any    `json:"data"`
@@ -44,11 +49,16 @@ func Fail(c *gin.Context, status int, code int, msg string) {
 
 func FailWithMsg(c *gin.Context, status int, msg string) {
 	// TODO: map[status] = code
-	Fail(c, status, 1000, msg)
+	Fail(c, status, 1, msg)
 }
 
 func FailWithErr(c *gin.Context, status int, err error) {
+	// TODO: map[status] = code
+	Fail(c, status, 1, err.Error())
+}
+
+func FailWithBindingErr(c *gin.Context, status int, err error) {
 	msg := ValidateError(err)
 	// TODO: map[status] = code
-	Fail(c, status, 1000, msg)
+	Fail(c, status, 1, msg)
 }
