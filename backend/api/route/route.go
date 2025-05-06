@@ -1,11 +1,12 @@
 package route
 
 import (
-	"github.com/KokoiRuby/rbac-based-management-system/backend/core/bootstrap"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func Setup(app *bootstrap.App, g *gin.Engine) {
+func Setup(cfg *config.RuntimeConfig, db *gorm.DB, g *gin.Engine) {
 	// Statics
 	g.Static("/uploads", "./static/uploads")
 
@@ -15,8 +16,11 @@ func Setup(app *bootstrap.App, g *gin.Engine) {
 	NewLivenessRouter(probeRouter)
 
 	// Public APIs
-	publicRouter := g.Group("v1")
+	publicRouter := g.Group("")
 	_ = publicRouter
+	NewSignupRouter(cfg, db, publicRouter)
+	//NewLoginRouter(env, timeout, db, publicRouter)
+	//NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
 	// Protected APIs
 	protectedRouter := g.Group("v1")

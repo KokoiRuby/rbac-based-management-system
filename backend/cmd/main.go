@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/api/route"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/bootstrap"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/core/lifecycle"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/logging"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
@@ -15,6 +12,8 @@ import (
 )
 
 func main() {
+	//gormGen()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -25,39 +24,40 @@ func main() {
 
 	app := bootstrap.NewApp(ctx)
 
-	signal.Notify(lifecycle.SigChan, syscall.SIGINT, syscall.SIGTERM)
-	go lifecycle.GracefulShutdown(app, cancel)
+	signal.Notify(bootstrap.SigChan, syscall.SIGINT, syscall.SIGTERM)
+	go app.Shutdown(cancel)
 
-	go func() {
-		if app.RuntimeConfig.Gin.TLS {
-			certFile := "./ssl/gin/gin.pem"
-			keyFile := "./ssl/gin/gin-key.pem"
+	go app.Start(ctx)
+	zap.S().Infof("Server running on :%v...", app.RuntimeConfig.Gin.Port)
 
-			if app.RuntimeConfig.Gin.MTLS {
-				// TODO: MTLS
-			}
-
-			g := gin.Default()
-			route.Setup(app, g)
-			err := g.RunTLS(app.RuntimeConfig.Gin.Addr(), certFile, keyFile) // Blocked
-			if err != nil {
-				zap.S().Fatalf("Failed to start Gin server: %v", err)
-			}
-		}
-		g := gin.Default()
-		route.Setup(app, g)
-		err = g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
-		if err != nil {
-			zap.S().Fatalf("Failed to start Gin server: %v", err)
-		}
-	}()
-
-	zap.S().Info("Program running. Press Ctrl+C to trigger graceful shutdown...")
 	select {
-	case <-lifecycle.ShutDownChan:
+	case <-bootstrap.ShutDownChan:
 		zap.S().Info("Graceful shutdown completed.")
 		os.Exit(0)
 	case <-time.After(5 * time.Minute):
-		zap.S().Info("Program timeout, exiting...")
+		zap.S().Info("Program timeout, exiting in 3s")
+		time.Sleep(3 * time.Second)
 	}
 }
+
+//func gormGen() {
+//	g := gen.NewGenerator(gen.Config{
+//		OutPath:       "./repository/query",
+//		ModelPkgPath:  "models",
+//		Mode:          gen.WithDefaultQuery | gen.WithoutContext,
+//		FieldNullable: true, // Null to pointer field
+//	})
+//
+//	dia := mysql.Open("root:rootroot@tcp(127.0.0.1:3306)/gorm?charset=utf8mb4&parseTime=True&loc=Local")
+//	session, _ := gorm.Open(dia, &gorm.Config{})
+//	g.UseDB(session)
+//	g.ApplyBasic(
+//		&model.User{},
+//		&model.Role{},
+//		&model.Menu{},
+//		&model.UserRoleBinding{},
+//		&model.RoleMenuBinding{},
+//		&model.Api{},
+//	)
+//	g.Execute()
+//}

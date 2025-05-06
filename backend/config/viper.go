@@ -26,6 +26,7 @@ type RuntimeConfig struct {
 	Redis   runtime.RedisConfig `yaml:"redis"`
 	Mongo   runtime.MongoConfig `yaml:"mongo"`
 	Gin     runtime.GinConfig   `yaml:"gin"`
+	JWT     runtime.JWT         `yaml:"jwt"`
 	Flags   Flags               `yaml:"-"` // As member not embedded
 }
 

@@ -8,10 +8,10 @@ services:
       - "8443:8443"
     environment:
       ENV: dev
-      TLS_CERT: "./ssl/gin/gin.pem"
-      TLS_KEY: "./ssl/gin/gin-key.pem"
       CONSUL_HTTP_ADDR: http://consul:8500
       GIN_MODE: "release"
+      TLS_CERT: "./ssl/gin/gin.pem"
+      TLS_KEY: "./ssl/gin/gin-key.pem"
     volumes:
       - ../config/settings.yaml:/app/config/settings.yaml
       - ../core/rbac/rbac.pml:/app/core/rbac/rbac.pml

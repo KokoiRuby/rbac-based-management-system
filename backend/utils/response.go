@@ -34,6 +34,7 @@ func OKWithList(c *gin.Context, status int, count int64, list any) {
 }
 
 func Fail(c *gin.Context, status int, code int, msg string) {
+	// TODO: map[status] = code
 	c.JSON(status, Response{
 		Code:    code,
 		Data:    gin.H{},
@@ -42,10 +43,12 @@ func Fail(c *gin.Context, status int, code int, msg string) {
 }
 
 func FailWithMsg(c *gin.Context, status int, msg string) {
+	// TODO: map[status] = code
 	Fail(c, status, 1000, msg)
 }
 
 func FailWithErr(c *gin.Context, status int, err error) {
 	msg := ValidateError(err)
+	// TODO: map[status] = code
 	Fail(c, status, 1000, msg)
 }
