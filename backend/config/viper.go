@@ -27,6 +27,7 @@ type RuntimeConfig struct {
 	Mongo   runtime.MongoConfig `yaml:"mongo"`
 	Gin     runtime.GinConfig   `yaml:"gin"`
 	JWT     runtime.JWT         `yaml:"jwt"`
+	SMTP    runtime.SMTPConfig  `yaml:"smtp"`
 	Flags   Flags               `yaml:"-"` // As member not embedded
 }
 

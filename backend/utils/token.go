@@ -12,6 +12,8 @@ import (
 type ClaimMeta struct {
 	UserID   uint   `json:"userID"`
 	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 	//RoleList []uint `json:"roleList"`
 }
 
@@ -20,10 +22,13 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+// TODO: function-ize jwt.NewWithClaims?!
+
 func CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {
 	meta := ClaimMeta{
 		UserID:   user.ID,
 		Username: user.Username,
+		Email:    user.Email,
 		//RoleList: user.RoleList,
 	}
 	claims := CustomClaims{
@@ -50,13 +55,34 @@ func CreateRefreshToken(user *model.User, cfg runtime.JWT) (accessToken string, 
 	claims := CustomClaims{
 		ClaimMeta: meta,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(cfg.Expire) * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(cfg.RefreshExpire) * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    cfg.Issuer,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	accessToken, err = token.SignedString([]byte(cfg.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return
+}
+
+func CreateConfirmToken(req *model.SignupConfirmRequest, cfg runtime.JWT) (confirmToken string, err error) {
+	meta := ClaimMeta{
+		Email:    req.Email,
+		Password: req.HashedPassword,
+	}
+	claims := CustomClaims{
+		ClaimMeta: meta,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(cfg.ConfirmExpire) * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    cfg.Issuer,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	confirmToken, err = token.SignedString([]byte(cfg.SecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -98,4 +124,15 @@ func ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.Numeric
 		return nil, err
 	}
 	return claims.ExpiresAt, nil
+}
+
+func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupRequest, error) {
+	claims, err := ParseToken(tokenString, cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &model.SignupRequest{
+		Email:    claims.Email,
+		Password: claims.Password,
+	}, nil
 }

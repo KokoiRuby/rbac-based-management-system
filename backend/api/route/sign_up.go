@@ -19,4 +19,5 @@ func NewSignupRouter(cfg *config.RuntimeConfig, db *gorm.DB, group *gin.RouterGr
 		RuntimeConfig: cfg,
 	}
 	group.POST("/signup", middleware.BindFormMiddleware[model.SignupRequest], h.Signup)
+	group.POST("/signup/confirm", h.SignupConfirm)
 }
