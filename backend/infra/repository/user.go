@@ -56,3 +56,15 @@ func (u userRDB) GetByEmail(c context.Context, email string) (model.User, error)
 	}
 	return *user, nil
 }
+
+func (u userRDB) Update(c context.Context, user *model.User) error {
+	query.SetDefault(u.rdb)
+	_, err := query.User.WithContext(c).Where(query.User.Email.Eq(user.Email)).Updates(user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		return err
+	}
+	return nil
+}

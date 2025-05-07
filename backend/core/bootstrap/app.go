@@ -56,10 +56,10 @@ func NewApp(ctx context.Context) *App {
 		app.Redis = persistence.NewRedisClient(ctx, app.RuntimeConfig.Redis)
 		close(RedisReady)
 	}()
-	go func() {
-		app.Mongo = persistence.NewMongoClient(ctx, app.RuntimeConfig.Mongo)
-		close(MongoReady)
-	}()
+	//go func() {
+	//	app.Mongo = persistence.NewMongoClient(ctx, app.RuntimeConfig.Mongo)
+	//	close(MongoReady)
+	//}()
 
 	return app
 }

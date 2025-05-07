@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/api/middleware"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
@@ -8,6 +9,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -28,6 +30,10 @@ func (handler *RefreshTokenHandler) Refresh(c *gin.Context) {
 
 	user, err := handler.RefreshTokenService.GetUserByID(c, id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.FailWithMsg(c, http.StatusNotFound, "User not found.")
+			return
+		}
 		zap.S().Errorf("failed to get user by id: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to refresh token.")
 		return

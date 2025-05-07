@@ -68,10 +68,30 @@ func CreateRefreshToken(user *model.User, cfg runtime.JWT) (accessToken string, 
 	return
 }
 
-func CreateConfirmToken(req *model.SignupConfirmRequest, cfg runtime.JWT) (confirmToken string, err error) {
+func CreateSignupConfirmToken(req *model.SignupConfirmRequest, cfg runtime.JWT) (confirmToken string, err error) {
 	meta := ClaimMeta{
 		Email:    req.Email,
 		Password: req.HashedPassword,
+	}
+	claims := CustomClaims{
+		ClaimMeta: meta,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(cfg.ConfirmExpire) * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    cfg.Issuer,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	confirmToken, err = token.SignedString([]byte(cfg.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return
+}
+
+func CreateForgotPasswordConfirmToken(req *model.ForgotPasswordRequest, cfg runtime.JWT) (confirmToken string, err error) {
+	meta := ClaimMeta{
+		Email: req.Email,
 	}
 	claims := CustomClaims{
 		ClaimMeta: meta,
@@ -135,4 +155,12 @@ func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupReq
 		Email:    claims.Email,
 		Password: claims.Password,
 	}, nil
+}
+
+func ExtractEmailFromToken(tokenString string, cfg runtime.JWT) (string, error) {
+	claims, err := ParseToken(tokenString, cfg)
+	if err != nil {
+		return "", err
+	}
+	return claims.Email, nil
 }

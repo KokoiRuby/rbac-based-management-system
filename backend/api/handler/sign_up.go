@@ -104,8 +104,8 @@ func (handler *SignupHandler) SignupConfirm(c *gin.Context) {
 
 	req, err := handler.SignupService.Confirm(tokenString, handler.RuntimeConfig.JWT)
 	if err != nil {
-		zap.S().Errorf("failed to confirm user: %v", err)
-		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")
+		zap.S().Errorf("failed to confirm token: %v", err)
+		utils.FailWithMsg(c, http.StatusBadRequest, "Invalid token.")
 		return
 	}
 
@@ -114,7 +114,7 @@ func (handler *SignupHandler) SignupConfirm(c *gin.Context) {
 		Password: req.Password,
 	}
 
-	err = handler.SignupService.Create(c, user)
+	err = handler.SignupService.CreateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to create user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")

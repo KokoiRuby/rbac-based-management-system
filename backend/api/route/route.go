@@ -22,6 +22,7 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, g *gin.E
 	NewSigninRouter(cfg, db, publicRouter)
 	NewRefreshTokenRouter(cfg, db, publicRouter)
 	NewSignoutRouter(cfg, cache, publicRouter)
+	NewForgotPasswordRouter(cfg, db, cache, publicRouter)
 
 	// Protected APIs
 	protectedRouter := g.Group("v1")

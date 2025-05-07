@@ -6,6 +6,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func NewSigninService(rdb service.UserRDB, timeout time.Duration) service.Signin
 	}
 }
 
-func (s signinService) GetUserByEmail(c context.Context, email string) (model.User, error) {
+func (s signinService) GetUserByEmail(c *gin.Context, email string) (model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByEmail(ctx, email)

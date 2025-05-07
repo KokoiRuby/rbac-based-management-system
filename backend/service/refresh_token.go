@@ -6,6 +6,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -25,7 +26,7 @@ func (s refreshTokenService) ExtractIDFromToken(token string, cfg runtime.JWT) (
 	return utils.ExtractIDFromToken(token, cfg)
 }
 
-func (s refreshTokenService) GetUserByID(c context.Context, id uint) (model.User, error) {
+func (s refreshTokenService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByID(ctx, id)

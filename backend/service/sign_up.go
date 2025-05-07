@@ -25,14 +25,14 @@ func NewSignupService(rdb service.UserRDB, cache service.RedisCache, timeout tim
 	}
 }
 
-func (s signupService) GetUserByEmail(c context.Context, email string) (model.User, error) {
+func (s signupService) GetUserByEmail(c *gin.Context, email string) (model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByEmail(ctx, email)
 }
 
 func (s signupService) CreateConfirmToken(req *model.SignupConfirmRequest, cfg runtime.JWT) (confirmToken string, err error) {
-	return utils.CreateConfirmToken(req, cfg)
+	return utils.CreateSignupConfirmToken(req, cfg)
 }
 
 func (s signupService) SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPConfig) error {
@@ -47,7 +47,7 @@ func (s signupService) CreateAccessToken(user *model.User, cfg runtime.JWT) (acc
 	return utils.CreateAccessToken(user, cfg)
 }
 
-func (s signupService) Create(c context.Context, user *model.User) error {
+func (s signupService) CreateUser(c *gin.Context, user *model.User) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.Create(ctx, user)
@@ -69,7 +69,7 @@ func (s signupService) DelKeyFromCache(c *gin.Context, key string) error {
 	return s.cache.DelKey(ctx, key)
 }
 
-func (s signupService) IsKeyExist(c context.Context, key string) (bool, error) {
+func (s signupService) IsKeyExist(c *gin.Context, key string) (bool, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.cache.IsKeyExist(ctx, key)
