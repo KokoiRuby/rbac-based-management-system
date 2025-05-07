@@ -21,14 +21,14 @@ func (handler *RefreshTokenHandler) Refresh(c *gin.Context) {
 
 	id, err := handler.RefreshTokenService.ExtractIDFromToken(req.RefreshToken, handler.RuntimeConfig.JWT)
 	if err != nil {
-		zap.S().Errorf("fail to extract id from refresh token: %v", err)
+		zap.S().Errorf("failed to extract id from refresh token: %v", err)
 		utils.FailWithMsg(c, http.StatusUnauthorized, "Invalid token")
 		return
 	}
 
 	user, err := handler.RefreshTokenService.GetUserByID(c, id)
 	if err != nil {
-		zap.S().Errorf("fail to get user by id: %v", err)
+		zap.S().Errorf("failed to get user by id: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to refresh token.")
 		return
 	}

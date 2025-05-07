@@ -22,7 +22,7 @@ func NewSigninService(rdb service.UserRDB, timeout time.Duration) service.Signin
 }
 
 func (s signinService) GetUserByEmail(c context.Context, email string) (model.User, error) {
-	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByEmail(ctx, email)
 }

@@ -35,7 +35,7 @@ func (u userRDB) List(c context.Context) ([]model.User, error) {
 
 func (u userRDB) GetByID(c context.Context, id uint) (model.User, error) {
 	query.SetDefault(u.rdb)
-	user, err := query.User.Where(query.User.ID.Eq(id)).Take()
+	user, err := query.User.WithContext(c).Where(query.User.ID.Eq(id)).Take()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.User{}, err
@@ -47,7 +47,7 @@ func (u userRDB) GetByID(c context.Context, id uint) (model.User, error) {
 
 func (u userRDB) GetByEmail(c context.Context, email string) (model.User, error) {
 	query.SetDefault(u.rdb)
-	user, err := query.User.Where(query.User.Email.Eq(email)).Take()
+	user, err := query.User.WithContext(c).Where(query.User.Email.Eq(email)).Take()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.User{}, err

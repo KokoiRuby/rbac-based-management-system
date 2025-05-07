@@ -21,20 +21,20 @@ func NewRefreshTokenService(rdb service.UserRDB, timeout time.Duration) service.
 	}
 }
 
-func (s refreshTokenService) ExtractIDFromToken(requestToken string, cfg runtime.JWT) (uint, error) {
-	return utils.ExtractIDFromToken(requestToken, cfg)
+func (s refreshTokenService) ExtractIDFromToken(token string, cfg runtime.JWT) (uint, error) {
+	return utils.ExtractIDFromToken(token, cfg)
 }
 
 func (s refreshTokenService) GetUserByID(c context.Context, id uint) (model.User, error) {
-	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByID(ctx, id)
 }
 
-func (r refreshTokenService) CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {
+func (s refreshTokenService) CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {
 	return utils.CreateAccessToken(user, cfg)
 }
 
-func (r refreshTokenService) CreateRefreshToken(user *model.User, cfg runtime.JWT) (refreshToken string, err error) {
+func (s refreshTokenService) CreateRefreshToken(user *model.User, cfg runtime.JWT) (refreshToken string, err error) {
 	return utils.CreateRefreshToken(user, cfg)
 }

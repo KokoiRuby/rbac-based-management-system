@@ -70,6 +70,7 @@ func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err 
 		}
 		return []byte(cfg.SecretKey), nil
 	})
+	fmt.Println(token, err)
 	if err != nil {
 		return nil, err
 	}
@@ -81,10 +82,20 @@ func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err 
 	return nil, errors.New("invalid token")
 }
 
+// TODO: generic-ize extract field from token via reflection
+
 func ExtractIDFromToken(tokenString string, cfg runtime.JWT) (uint, error) {
 	claims, err := ParseToken(tokenString, cfg)
 	if err != nil {
 		return 0, err
 	}
 	return claims.UserID, nil
+}
+
+func ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.NumericDate, error) {
+	claims, err := ParseToken(tokenString, cfg)
+	if err != nil {
+		return nil, err
+	}
+	return claims.ExpiresAt, nil
 }

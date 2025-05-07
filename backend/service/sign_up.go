@@ -22,13 +22,13 @@ func NewSignupService(rdb service.UserRDB, timeout time.Duration) service.Signup
 }
 
 func (s signupService) Create(c context.Context, user *model.User) error {
-	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.Create(ctx, user)
 }
 
 func (s signupService) GetUserByEmail(c context.Context, email string) (model.User, error) {
-	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByEmail(ctx, email)
 }
