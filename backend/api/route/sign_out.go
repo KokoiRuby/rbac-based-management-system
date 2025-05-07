@@ -13,9 +13,9 @@ import (
 )
 
 func NewSignoutRouter(cfg *config.RuntimeConfig, client *redis.Client, group *gin.RouterGroup) {
-	repo := repository.NewRedisRepository(client)
+	cache := repository.NewRedisCache(client)
 	h := handler.SignoutHandler{
-		SignoutService: service.NewSignoutService(repo, time.Duration(cfg.Gin.Timeout)),
+		SignoutService: service.NewSignoutService(cache, time.Duration(cfg.Gin.Timeout)),
 		RuntimeConfig:  cfg,
 	}
 	group.POST("/signout", middleware.BindFormMiddleware[model.SignoutRequest], h.Signout)

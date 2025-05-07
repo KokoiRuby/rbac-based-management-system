@@ -18,7 +18,7 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, g *gin.E
 
 	// Public APIs
 	publicRouter := g.Group("")
-	NewSignupRouter(cfg, db, publicRouter)
+	NewSignupRouter(cfg, db, cache, publicRouter)
 	NewSigninRouter(cfg, db, publicRouter)
 	NewRefreshTokenRouter(cfg, db, publicRouter)
 	NewSignoutRouter(cfg, cache, publicRouter)

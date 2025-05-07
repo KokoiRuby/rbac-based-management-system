@@ -8,4 +8,5 @@ import (
 type RedisCache interface {
 	SetKeyWithTTL(c context.Context, key string, value string, ttl time.Duration) (string, error)
 	IsKeyExist(c context.Context, key string) (bool, error)
+	DelKey(c context.Context, key string) error
 }

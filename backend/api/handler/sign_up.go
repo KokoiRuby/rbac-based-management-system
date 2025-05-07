@@ -13,6 +13,7 @@ import (
 	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 type SignupHandler struct {
@@ -23,9 +24,18 @@ type SignupHandler struct {
 func (handler *SignupHandler) Signup(c *gin.Context) {
 	req := middleware.GetBind[model.SignupRequest](c)
 
-	// TODO: Get key from redis
+	// Check key in cache if signup is ongoing
+	key := fmt.Sprintf("signup_%v", req.Email)
+	exists, err := handler.SignupService.IsKeyExist(c, key)
+	if err != nil {
+		zap.S().Errorf("failed to get key from cache: %v", err)
+	}
+	if exists {
+		utils.OKWithMsg(c, http.StatusOK, "Signup is still ongoing.")
+		return
+	}
 
-	_, err := handler.SignupService.GetUserByEmail(c, req.Email)
+	_, err = handler.SignupService.GetUserByEmail(c, req.Email)
 	if err == nil {
 		utils.FailWithMsg(c, http.StatusConflict, "Email already registered.")
 		return
@@ -73,6 +83,14 @@ func (handler *SignupHandler) Signup(c *gin.Context) {
 	}
 	zap.S().Debugf("Send confirmation mail to %v successfully.", req.Email)
 
+	// Set key to cache to flag ongoing signup
+	_, err = handler.SignupService.SetKeyWithTTLToCache(c, key, "", time.Duration(handler.RuntimeConfig.JWT.ConfirmExpire)*time.Minute)
+	if err != nil {
+		zap.S().Errorf("failed to set key to cache: %v", err)
+		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")
+		return
+	}
+
 	utils.OKWithMsg(c, http.StatusOK, "Please go to your mailbox to confirm and finish the sign up process.")
 	return
 }
@@ -116,6 +134,15 @@ func (handler *SignupHandler) SignupConfirm(c *gin.Context) {
 	if err != nil {
 		zap.S().Errorf("failed to create refresh token: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")
+	}
+
+	// Delete key in cache to unflag ongoing signup
+	key := fmt.Sprintf("signup_%v", req.Email)
+	err = handler.SignupService.DelKeyFromCache(c, key)
+	if err != nil {
+		zap.S().Errorf("failed to delete key from cache: %v", err)
+		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signup.")
+		return
 	}
 
 	resp := model.SignupResponse{
