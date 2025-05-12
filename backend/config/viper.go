@@ -21,14 +21,15 @@ type Flags struct {
 }
 
 type RuntimeConfig struct {
-	Logging runtime.Logging     `yaml:"logging"`
-	RDB     runtime.RDBConfig   `yaml:"rdb"`
-	Redis   runtime.RedisConfig `yaml:"redis"`
-	Mongo   runtime.MongoConfig `yaml:"mongo"`
-	Gin     runtime.GinConfig   `yaml:"gin"`
-	JWT     runtime.JWT         `yaml:"jwt"`
-	SMTP    runtime.SMTPConfig  `yaml:"smtp"`
-	Flags   Flags               `yaml:"-"` // As member not embedded
+	Logging runtime.Logging      `yaml:"logging"`
+	RDB     runtime.RDBConfig    `yaml:"rdb"`
+	Redis   runtime.RedisConfig  `yaml:"redis"`
+	Mongo   runtime.MongoConfig  `yaml:"mongo"`
+	Gin     runtime.GinConfig    `yaml:"gin"`
+	JWT     runtime.JWT          `yaml:"jwt"`
+	SMTP    runtime.SMTPConfig   `yaml:"smtp"`
+	Upload  runtime.UploadConfig `yaml:"upload"`
+	Flags   Flags                `yaml:"-"` // As member not embedded
 }
 
 func NewRuntimeConfig() *RuntimeConfig {
