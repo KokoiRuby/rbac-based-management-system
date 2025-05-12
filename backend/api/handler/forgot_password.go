@@ -99,7 +99,7 @@ func (handler *ForgotPasswordHandler) ForgotConfirm(c *gin.Context) {
 		return
 	}
 
-	email, err := handler.ForgotPasswordService.Confirm(tokenString, handler.RuntimeConfig.JWT)
+	email, err := handler.ForgotPasswordService.Confirm(tokenString)
 	if err != nil {
 		zap.S().Errorf("failed to confirm token: %v", err)
 		utils.FailWithMsg(c, http.StatusBadRequest, "Invalid token.")

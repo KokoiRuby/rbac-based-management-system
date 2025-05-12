@@ -23,6 +23,10 @@ type SignupHandler struct {
 
 func (handler *SignupHandler) Signup(c *gin.Context) {
 	req := middleware.GetBind[model.SignupRequest](c)
+	if req.Password != req.PasswordConfirm {
+		utils.FailWithMsg(c, http.StatusBadRequest, "Passwords do not match")
+		return
+	}
 
 	// Check key in cache if signup is ongoing
 	key := fmt.Sprintf("signup_%v", req.Email)
@@ -102,7 +106,7 @@ func (handler *SignupHandler) SignupConfirm(c *gin.Context) {
 		return
 	}
 
-	req, err := handler.SignupService.Confirm(tokenString, handler.RuntimeConfig.JWT)
+	req, err := handler.SignupService.Confirm(tokenString)
 	if err != nil {
 		zap.S().Errorf("failed to confirm token: %v", err)
 		utils.FailWithMsg(c, http.StatusBadRequest, "Invalid token.")

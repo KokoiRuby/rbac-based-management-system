@@ -21,7 +21,7 @@ type RefreshTokenHandler struct {
 func (handler *RefreshTokenHandler) Refresh(c *gin.Context) {
 	req := middleware.GetBind[model.RefreshTokenRequest](c)
 
-	id, err := handler.RefreshTokenService.ExtractIDFromToken(req.RefreshToken, handler.RuntimeConfig.JWT)
+	id, err := handler.RefreshTokenService.ExtractIDFromToken(req.RefreshToken)
 	if err != nil {
 		zap.S().Errorf("failed to extract id from refresh token: %v", err)
 		utils.FailWithMsg(c, http.StatusUnauthorized, "Invalid token")

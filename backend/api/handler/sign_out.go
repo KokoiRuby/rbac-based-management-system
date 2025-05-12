@@ -2,9 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/api/middleware"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
@@ -19,18 +17,16 @@ type SignoutHandler struct {
 }
 
 func (handler *SignoutHandler) Signout(c *gin.Context) {
-	req := middleware.GetBind[model.SignoutRequest](c)
-
-	fmt.Println(req.AccessToken)
-
-	expireAt, err := handler.SignoutService.ExtractExpireAtFromToken(req.AccessToken, handler.RuntimeConfig.JWT)
-	if err != nil {
-		zap.S().Errorf("failed to extract expireAt from token: %v", err)
-		utils.FailWithMsg(c, http.StatusUnauthorized, "Invalid token")
+	claims, ok := c.Get("claims")
+	if !ok {
+		zap.S().Error("failed to get claims from context")
+		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to signout.")
 		return
 	}
 
-	key := fmt.Sprintf("signout_%s", req.AccessToken)
+	email := claims.(*utils.CustomClaims).Email
+	expireAt := claims.(*utils.CustomClaims).ExpiresAt
+	key := fmt.Sprintf("signout_%s", email)
 
 	flag, err := handler.SignoutService.IsSignedOut(c, key)
 	if err != nil {
@@ -39,7 +35,7 @@ func (handler *SignoutHandler) Signout(c *gin.Context) {
 		return
 	}
 	if flag {
-		utils.FailWithMsg(c, http.StatusUnauthorized, "Already signed out.")
+		utils.OKWithMsg(c, http.StatusFound, "Already signed out.")
 		return
 	}
 
@@ -51,6 +47,6 @@ func (handler *SignoutHandler) Signout(c *gin.Context) {
 		return
 	}
 
-	utils.FailWithMsg(c, http.StatusOK, "Signout successfully")
+	utils.OKWithMsg(c, http.StatusOK, "Signout successfully")
 	return
 }

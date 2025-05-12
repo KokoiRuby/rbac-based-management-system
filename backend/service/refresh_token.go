@@ -22,8 +22,8 @@ func NewRefreshTokenService(rdb service.UserRDB, timeout time.Duration) service.
 	}
 }
 
-func (s refreshTokenService) ExtractIDFromToken(token string, cfg runtime.JWT) (uint, error) {
-	return utils.ExtractIDFromToken(token, cfg)
+func (s refreshTokenService) ExtractIDFromToken(token string) (uint, error) {
+	return utils.ExtractIDFromToken(token)
 }
 
 func (s refreshTokenService) GetUserByID(c *gin.Context, id uint) (model.User, error) {

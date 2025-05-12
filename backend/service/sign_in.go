@@ -12,12 +12,14 @@ import (
 
 type signinService struct {
 	userRDB        service.UserRDB
+	cache          service.RedisCache
 	contextTimeout time.Duration
 }
 
-func NewSigninService(rdb service.UserRDB, timeout time.Duration) service.SigninService {
+func NewSigninService(rdb service.UserRDB, cache service.RedisCache, timeout time.Duration) service.SigninService {
 	return &signinService{
 		userRDB:        rdb,
+		cache:          cache,
 		contextTimeout: timeout,
 	}
 }
@@ -34,4 +36,10 @@ func (s signinService) CreateAccessToken(user *model.User, cfg runtime.JWT) (acc
 
 func (s signinService) CreateRefreshToken(user *model.User, cfg runtime.JWT) (refreshToken string, err error) {
 	return utils.CreateRefreshToken(user, cfg)
+}
+
+func (s signinService) UnFlagSignout(c *gin.Context, key string) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.cache.DelKey(ctx, key)
 }

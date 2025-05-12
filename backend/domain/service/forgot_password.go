@@ -12,7 +12,7 @@ type ForgotPasswordService interface {
 	GetUserByEmail(c *gin.Context, email string) (model.User, error)
 	CreateConfirmToken(user *model.ForgotPasswordRequest, cfg runtime.JWT) (confirmToken string, err error)
 	SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPConfig) error
-	Confirm(token string, cfg runtime.JWT) (string, error)
+	Confirm(token string) (string, error)
 	SetKeyWithTTLToCache(c *gin.Context, key string, value string, ttl time.Duration) (string, error)
 	DelKeyFromCache(c *gin.Context, key string) error
 	IsKeyExist(c *gin.Context, key string) (bool, error)

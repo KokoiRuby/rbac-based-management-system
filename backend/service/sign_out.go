@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
@@ -22,8 +21,8 @@ func NewSignoutService(cache service.RedisCache, duration time.Duration) service
 	}
 }
 
-func (s signoutService) ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.NumericDate, error) {
-	return utils.ExtractExpireAtFromToken(tokenString, cfg)
+func (s signoutService) ExtractExpireAtFromToken(tokenString string) (*jwt.NumericDate, error) {
+	return utils.ExtractExpireAtFromToken(tokenString)
 }
 
 func (s signoutService) SetKeyWithTTLToCache(c *gin.Context, key string, value string, ttl time.Duration) (string, error) {

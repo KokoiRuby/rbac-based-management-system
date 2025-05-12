@@ -8,14 +8,16 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/infra/repository"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/service"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"time"
 )
 
-func NewSigninRouter(cfg *config.RuntimeConfig, db *gorm.DB, group *gin.RouterGroup) {
+func NewSigninRouter(cfg *config.RuntimeConfig, db *gorm.DB, client *redis.Client, group *gin.RouterGroup) {
 	repo := repository.NewUserRepository(db)
+	cache := repository.NewRedisCache(client)
 	h := handler.SigninHandler{
-		SigninService: service.NewSigninService(repo, time.Duration(cfg.Gin.Timeout)),
+		SigninService: service.NewSigninService(repo, cache, time.Duration(cfg.Gin.Timeout)),
 		RuntimeConfig: cfg,
 	}
 	group.POST("/signin", middleware.BindFormMiddleware[model.SigninRequest], h.Signin)

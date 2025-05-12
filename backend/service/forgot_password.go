@@ -39,8 +39,8 @@ func (s forgotPasswordService) SendConfirmEmail(msg *gomail.Message, cfg runtime
 	return utils.SendEmail(msg, cfg)
 }
 
-func (s forgotPasswordService) Confirm(token string, cfg runtime.JWT) (string, error) {
-	return utils.ExtractEmailFromToken(token, cfg)
+func (s forgotPasswordService) Confirm(token string) (string, error) {
+	return utils.ExtractEmailFromToken(token)
 }
 
 func (s forgotPasswordService) SetKeyWithTTLToCache(c *gin.Context, key string, value string, ttl time.Duration) (string, error) {

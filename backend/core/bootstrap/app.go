@@ -6,6 +6,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/api/route"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/core/rbac"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/infra/persistence"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/casbin/casbin/v2"
@@ -54,6 +55,7 @@ func NewApp(ctx context.Context) *App {
 
 	go func() {
 		app.Redis = persistence.NewRedisClient(ctx, app.RuntimeConfig.Redis)
+		global.Redis = app.Redis
 		close(RedisReady)
 	}()
 	//go func() {

@@ -39,8 +39,8 @@ func (s signupService) SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPCon
 	return utils.SendEmail(msg, cfg)
 }
 
-func (s signupService) Confirm(token string, cfg runtime.JWT) (*model.SignupRequest, error) {
-	return utils.ExtractCredFromToken(token, cfg)
+func (s signupService) Confirm(token string) (*model.SignupRequest, error) {
+	return utils.ExtractCredFromToken(token)
 }
 
 func (s signupService) CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {

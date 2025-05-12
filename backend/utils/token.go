@@ -6,6 +6,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 	"time"
 )
 
@@ -23,6 +24,7 @@ type CustomClaims struct {
 }
 
 // TODO: function-ize jwt.NewWithClaims?!
+// TODO:
 
 func CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {
 	meta := ClaimMeta{
@@ -109,14 +111,71 @@ func CreateForgotPasswordConfirmToken(req *model.ForgotPasswordRequest, cfg runt
 	return
 }
 
-func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err error) {
+//func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err error) {
+//	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+//		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+//			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+//		}
+//		return []byte(cfg.SecretKey), nil
+//	})
+//	fmt.Println(token, err)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+//		return claims, nil
+//	}
+//
+//	return nil, errors.New("invalid token")
+//}
+//
+//// TODO: generic-ize extract field from token via reflection
+//
+//func ExtractIDFromToken(tokenString string, cfg runtime.JWT) (uint, error) {
+//	claims, err := ParseToken(tokenString, cfg)
+//	if err != nil {
+//		return 0, err
+//	}
+//	return claims.UserID, nil
+//}
+//
+//func ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.NumericDate, error) {
+//	claims, err := ParseToken(tokenString, cfg)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return claims.ExpiresAt, nil
+//}
+//
+//func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupRequest, error) {
+//	claims, err := ParseToken(tokenString, cfg)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return &model.SignupRequest{
+//		Email:    claims.Email,
+//		Password: claims.Password,
+//	}, nil
+//}
+//
+//func ExtractEmailFromToken(tokenString string, cfg runtime.JWT) (string, error) {
+//	claims, err := ParseToken(tokenString, cfg)
+//	if err != nil {
+//		return "", err
+//	}
+//	return claims.Email, nil
+//}
+
+// Refactor
+
+func ParseToken(tokenString string) (claims *CustomClaims, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(cfg.SecretKey), nil
+		return []byte(viper.GetString("jwt.secretKey")), nil
 	})
-	fmt.Println(token, err)
 	if err != nil {
 		return nil, err
 	}
@@ -128,26 +187,24 @@ func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err 
 	return nil, errors.New("invalid token")
 }
 
-// TODO: generic-ize extract field from token via reflection
-
-func ExtractIDFromToken(tokenString string, cfg runtime.JWT) (uint, error) {
-	claims, err := ParseToken(tokenString, cfg)
+func ExtractIDFromToken(tokenString string) (uint, error) {
+	claims, err := ParseToken(tokenString)
 	if err != nil {
 		return 0, err
 	}
 	return claims.UserID, nil
 }
 
-func ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.NumericDate, error) {
-	claims, err := ParseToken(tokenString, cfg)
+func ExtractExpireAtFromToken(tokenString string) (*jwt.NumericDate, error) {
+	claims, err := ParseToken(tokenString)
 	if err != nil {
 		return nil, err
 	}
 	return claims.ExpiresAt, nil
 }
 
-func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupRequest, error) {
-	claims, err := ParseToken(tokenString, cfg)
+func ExtractCredFromToken(tokenString string) (*model.SignupRequest, error) {
+	claims, err := ParseToken(tokenString)
 	if err != nil {
 		return nil, err
 	}
@@ -157,8 +214,8 @@ func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupReq
 	}, nil
 }
 
-func ExtractEmailFromToken(tokenString string, cfg runtime.JWT) (string, error) {
-	claims, err := ParseToken(tokenString, cfg)
+func ExtractEmailFromToken(tokenString string) (string, error) {
+	claims, err := ParseToken(tokenString)
 	if err != nil {
 		return "", err
 	}
