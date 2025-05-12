@@ -43,3 +43,15 @@ func (s signinService) UnFlagSignout(c *gin.Context, key string) error {
 	defer cancel()
 	return s.cache.DelKey(ctx, key)
 }
+
+func (s signinService) FlagSignin(c *gin.Context, key string, value string, ttl time.Duration) (string, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.cache.SetKeyWithTTL(ctx, key, value, ttl)
+}
+
+func (s signinService) IsKeyExist(c *gin.Context, key string) (bool, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.cache.IsKeyExist(ctx, key)
+}

@@ -35,7 +35,7 @@ func (handler *SignoutHandler) Signout(c *gin.Context) {
 		return
 	}
 	if flag {
-		utils.OKWithMsg(c, http.StatusFound, "Already signed out.")
+		utils.FailWithMsg(c, http.StatusConflict, "Already signed out.")
 		return
 	}
 

@@ -29,7 +29,7 @@ func AuthNMiddleware(c *gin.Context) {
 		return
 	}
 
-	// Is logged out?
+	// Is signout?
 	key := fmt.Sprintf("signout_%s", claims.Email)
 	_, err = global.Redis.Exists(context.Background(), key).Result()
 	if err != nil {
