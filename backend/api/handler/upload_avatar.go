@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -45,15 +47,52 @@ func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 		return
 	}
 
+	baseDir := path.Join("/app/static/uploads", handler.RuntimeConfig.Upload.Avatar.Dir, email)
+	originalFilename := fileHeader.Filename
+	ext := filepath.Ext(originalFilename)
+	baseName := strings.TrimSuffix(originalFilename, ext)
+	dir := path.Join(baseDir, originalFilename)
+
 	// TODO: Left-shift-able to frontend
-	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if _, ok := exts[ext]; !ok {
 		utils.FailWithMsg(c, http.StatusBadRequest, "Image extension not supported.")
 		return
 	}
 
-	dst := path.Join("/app/static/uploads", handler.RuntimeConfig.Upload.Avatar.Dir, email, fileHeader.Filename)
-	err = c.SaveUploadedFile(fileHeader, dst)
+	// De-duplicate
+	counter := 0
+	for {
+		_, err := os.Stat(dir)
+		if os.IsNotExist(err) {
+			break
+		}
+
+		toUpload, err := fileHeader.Open()
+		if err != nil {
+			utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
+			return
+		}
+		toUploadHash := utils.GetMD5(toUpload)
+
+		// sudo chown -R $USER:$USER ./static/uploads/avatars
+		existed, err := os.Open(dir)
+		if err != nil {
+			utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
+			return
+		}
+		existedHash := utils.GetMD5(existed)
+
+		if existedHash == toUploadHash {
+			utils.OKWithMsg(c, http.StatusOK, "Upload avatar successfully")
+			return
+		}
+
+		counter++
+		newFilename := fmt.Sprintf("%s (%d)%s", baseName, counter, ext)
+		dir = path.Join(baseDir, newFilename)
+	}
+
+	err = c.SaveUploadedFile(fileHeader, dir)
 	if err != nil {
 		zap.S().Errorf("failed to save and upload file: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
