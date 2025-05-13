@@ -20,7 +20,7 @@ func NewResetPasswordService(rdb service.UserRDB, timeout time.Duration) service
 	}
 }
 
-func (s resetPasswordService) GetByID(c context.Context, id uint) (model.User, error) {
+func (s resetPasswordService) GetByID(c *gin.Context, id uint) (model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByID(ctx, id)

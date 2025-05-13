@@ -30,4 +30,5 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	userGroup := protectedRouter.Group("user")
 	NewResetPasswordRouter(cfg, db, userGroup)
 	NewUploadAvatarRouter(cfg, objStore, userGroup)
+	NewUpdateUserRouter(cfg, db, cache, userGroup)
 }
