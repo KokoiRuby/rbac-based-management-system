@@ -13,6 +13,7 @@ import (
 type ClaimMeta struct {
 	UserID   uint   `json:"userID"`
 	Username string `json:"username"`
+	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	//RoleList []uint `json:"roleList"`
@@ -111,63 +112,27 @@ func CreateForgotPasswordConfirmToken(req *model.ForgotPasswordRequest, cfg runt
 	return
 }
 
-//func ParseToken(tokenString string, cfg runtime.JWT) (claims *CustomClaims, err error) {
-//	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-//		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-//			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-//		}
-//		return []byte(cfg.SecretKey), nil
-//	})
-//	fmt.Println(token, err)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
-//		return claims, nil
-//	}
-//
-//	return nil, errors.New("invalid token")
-//}
-//
-//// TODO: generic-ize extract field from token via reflection
-//
-//func ExtractIDFromToken(tokenString string, cfg runtime.JWT) (uint, error) {
-//	claims, err := ParseToken(tokenString, cfg)
-//	if err != nil {
-//		return 0, err
-//	}
-//	return claims.UserID, nil
-//}
-//
-//func ExtractExpireAtFromToken(tokenString string, cfg runtime.JWT) (*jwt.NumericDate, error) {
-//	claims, err := ParseToken(tokenString, cfg)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return claims.ExpiresAt, nil
-//}
-//
-//func ExtractCredFromToken(tokenString string, cfg runtime.JWT) (*model.SignupRequest, error) {
-//	claims, err := ParseToken(tokenString, cfg)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return &model.SignupRequest{
-//		Email:    claims.Email,
-//		Password: claims.Password,
-//	}, nil
-//}
-//
-//func ExtractEmailFromToken(tokenString string, cfg runtime.JWT) (string, error) {
-//	claims, err := ParseToken(tokenString, cfg)
-//	if err != nil {
-//		return "", err
-//	}
-//	return claims.Email, nil
-//}
-
-// Refactor
+func CreateUserUpdateConfirmToken(req *model.UserUpdateConfirmRequest, cfg runtime.JWT) (confirmToken string, err error) {
+	meta := ClaimMeta{
+		Username: req.Username,
+		Nickname: req.Nickname,
+		Email:    req.Email,
+	}
+	claims := CustomClaims{
+		ClaimMeta: meta,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(cfg.ConfirmExpire) * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    cfg.Issuer,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	confirmToken, err = token.SignedString([]byte(cfg.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return
+}
 
 func ParseToken(tokenString string) (claims *CustomClaims, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -203,7 +168,7 @@ func ExtractExpireAtFromToken(tokenString string) (*jwt.NumericDate, error) {
 	return claims.ExpiresAt, nil
 }
 
-func ExtractCredFromToken(tokenString string) (*model.SignupRequest, error) {
+func ExtractSignupRequestFromToken(tokenString string) (*model.SignupRequest, error) {
 	claims, err := ParseToken(tokenString)
 	if err != nil {
 		return nil, err
@@ -211,6 +176,18 @@ func ExtractCredFromToken(tokenString string) (*model.SignupRequest, error) {
 	return &model.SignupRequest{
 		Email:    claims.Email,
 		Password: claims.Password,
+	}, nil
+}
+
+func ExtractUserUpdateRequestFromToken(tokenString string) (*model.UserUpdateConfirmRequest, error) {
+	claims, err := ParseToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	return &model.UserUpdateConfirmRequest{
+		Username: claims.Username,
+		Nickname: claims.Nickname,
+		Email:    claims.Email,
 	}, nil
 }
 

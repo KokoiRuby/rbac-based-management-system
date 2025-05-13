@@ -40,7 +40,7 @@ func (s signupService) SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPCon
 }
 
 func (s signupService) Confirm(token string) (*model.SignupRequest, error) {
-	return utils.ExtractCredFromToken(token)
+	return utils.ExtractSignupRequestFromToken(token)
 }
 
 func (s signupService) CreateAccessToken(user *model.User, cfg runtime.JWT) (accessToken string, err error) {

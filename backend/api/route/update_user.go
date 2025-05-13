@@ -24,5 +24,7 @@ func NewUpdateUserRouter(cfg *config.RuntimeConfig, db *gorm.DB, client *redis.C
 		middleware.AuthNMiddleware,
 		middleware.BindFormMiddleware[model.UserUpdate],
 		h.Update)
+	group.POST("/update/confirm",
+		h.UpdateConfirm)
 
 }

@@ -7,3 +7,10 @@ type UserUpdate struct {
 	Nickname string `form:"nickname"`
 	Email    string `form:"email"`
 }
+
+type UserUpdateConfirmRequest struct {
+	UserID   uint
+	Username string
+	Nickname string
+	Email    string
+}
