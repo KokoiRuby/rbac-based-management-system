@@ -2,12 +2,13 @@ package route
 
 import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, g *gin.Engine) {
+func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore *s3.Client, g *gin.Engine) {
 	// Statics
 	g.Static("/uploads", "./static/uploads")
 
@@ -28,5 +29,5 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, g *gin.E
 	protectedRouter := g.Group("v1")
 	userGroup := protectedRouter.Group("user")
 	NewResetPasswordRouter(cfg, db, userGroup)
-	NewUploadAvatarRouter(cfg, userGroup)
+	NewUploadAvatarRouter(cfg, objStore, userGroup)
 }

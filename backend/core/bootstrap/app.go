@@ -9,6 +9,7 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/global"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/infra/persistence"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -35,6 +36,7 @@ type App struct {
 	Redis         *redis.Client
 	Mongo         *mongo.Client
 	Casbin        *casbin.CachedEnforcer
+	S3            *s3.Client
 }
 
 func NewApp(ctx context.Context) *App {
@@ -58,10 +60,15 @@ func NewApp(ctx context.Context) *App {
 		global.Redis = app.Redis
 		close(RedisReady)
 	}()
+
 	//go func() {
 	//	app.Mongo = persistence.NewMongoClient(ctx, app.RuntimeConfig.Mongo)
 	//	close(MongoReady)
 	//}()
+
+	go func() {
+		app.S3 = persistence.NewS3Client(ctx, app.RuntimeConfig.AWS)
+	}()
 
 	return app
 }
@@ -119,14 +126,14 @@ func (app *App) Start(ctx context.Context) {
 		//<-MongoReady
 
 		g := gin.Default()
-		route.Setup(app.RuntimeConfig, app.RDB, app.Redis, g)
+		route.Setup(app.RuntimeConfig, app.RDB, app.Redis, app.S3, g)
 		err := g.RunTLS(app.RuntimeConfig.Gin.Addr(), certFile, keyFile) // Blocked
 		if err != nil {
 			zap.S().Fatalf("Failed to start Gin server: %v", err)
 		}
 	}
 	g := gin.Default()
-	route.Setup(app.RuntimeConfig, app.RDB, app.Redis, g)
+	route.Setup(app.RuntimeConfig, app.RDB, app.Redis, app.S3, g)
 	err := g.Run(app.RuntimeConfig.Gin.Addr()) // Blocked
 	if err != nil {
 		zap.S().Fatalf("Failed to start Gin server: %v", err)

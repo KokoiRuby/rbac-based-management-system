@@ -29,6 +29,7 @@ type RuntimeConfig struct {
 	JWT     runtime.JWT          `yaml:"jwt"`
 	SMTP    runtime.SMTPConfig   `yaml:"smtp"`
 	Upload  runtime.UploadConfig `yaml:"upload"`
+	AWS     runtime.AWS          `yaml:"aws"`
 	Flags   Flags                `yaml:"-"` // As member not embedded
 }
 
