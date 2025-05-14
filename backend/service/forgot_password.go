@@ -25,7 +25,7 @@ func NewForgotPasswordService(rdb service.UserRDB, cache service.RedisCache, tim
 	}
 }
 
-func (s forgotPasswordService) GetUserByEmail(c *gin.Context, email string) (model.User, error) {
+func (s forgotPasswordService) GetUserByEmail(c *gin.Context, email string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByEmail(ctx, email)

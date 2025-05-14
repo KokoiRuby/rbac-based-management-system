@@ -94,7 +94,7 @@ func (s AvatarService) UploadToLocal(c *gin.Context, baseDir string, fileHeader 
 	return nil
 }
 
-func (s AvatarService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
+func (s AvatarService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByID(ctx, id)

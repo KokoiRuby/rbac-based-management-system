@@ -63,7 +63,7 @@ func (handler *SigninHandler) Signin(c *gin.Context) {
 	}
 
 	accessToken, err := handler.SigninService.CreateAccessToken(
-		&user,
+		user,
 		handler.RuntimeConfig.JWT)
 	if err != nil {
 		zap.S().Errorf("failed to create access token: %v", err)
@@ -72,7 +72,7 @@ func (handler *SigninHandler) Signin(c *gin.Context) {
 	c.Header("Authorization", "Bearer "+accessToken)
 
 	refreshToken, err := handler.SigninService.CreateRefreshToken(
-		&user,
+		user,
 		handler.RuntimeConfig.JWT)
 	if err != nil {
 		zap.S().Errorf("failed to create refresh token: %v", err)

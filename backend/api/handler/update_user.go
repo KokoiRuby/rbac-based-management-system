@@ -50,7 +50,7 @@ func (handler *UpdateUserHandler) Update(c *gin.Context) {
 
 	// Validate uniqueness
 	if req.Username != "" && user.Username != req.Username {
-		ok, err := handler.UpdateUserService.ValidateUserNameUniqueness(c, &user, req.Username)
+		ok, err := handler.UpdateUserService.ValidateUserNameUniqueness(c, user, req.Username)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				zap.S().Errorf("failed to validate username uniqueness: %v", err)
@@ -68,7 +68,7 @@ func (handler *UpdateUserHandler) Update(c *gin.Context) {
 
 	// Validate uniqueness
 	if req.Email != "" && user.Email != req.Email {
-		ok, err := handler.UpdateUserService.ValidateEmailUniqueness(c, &user, req.Email)
+		ok, err := handler.UpdateUserService.ValidateEmailUniqueness(c, user, req.Email)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				zap.S().Errorf("failed to validate username uniqueness: %v", err)
@@ -117,7 +117,7 @@ func (handler *UpdateUserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	err = handler.UpdateUserService.UpdateUser(c, &user)
+	err = handler.UpdateUserService.UpdateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to update user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to update user.")
@@ -163,7 +163,7 @@ func (handler *UpdateUserHandler) UpdateConfirm(c *gin.Context) {
 
 	user.Email = req.Email
 
-	err = handler.UpdateUserService.UpdateUser(c, &user)
+	err = handler.UpdateUserService.UpdateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to update user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to update user.")

@@ -5,6 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserProfileService interface {
-	GetUserByID(c *gin.Context, id uint) (*model.User, error)
+type ListUsersService interface {
+	ListUsers(c *gin.Context, opt model.QueryOptions) ([]*model.User, int64, error)
 }

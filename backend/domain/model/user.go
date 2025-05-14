@@ -8,7 +8,7 @@ type User struct {
 	Avatar   string `gorm:"size:512" json:"avatar,omitempty"`
 	Email    string `gorm:"size:128" json:"email,omitempty"` // Assuming email is optional
 	//Phone    string `gorm:"size:32;uniqueIndex" json:"phone,omitempty"` // For SMS OTP
-	IsAdmin bool `gorm:"default:false" json:"is_admin"`
+	IsAdmin bool `gorm:"default:false" json:"isAdmin"`
 
 	// One user can have many roles
 	// https://gorm.io/docs/many_to_many.html

@@ -29,7 +29,7 @@ func NewUpdateUserService(rdb service.UserRDB, cache service.RedisCache, context
 	}
 }
 
-func (s updateUserService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
+func (s updateUserService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByID(ctx, id)
@@ -44,15 +44,15 @@ func (s updateUserService) ValidateUserNameUniqueness(c *gin.Context, user *mode
 		query.User.ID.Neq(user.ID),
 	}
 
-	_, found, err := s.rdb.GetByCond(ctx, conds...)
+	_, err := s.rdb.GetByCond(ctx, conds...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return !found, nil
+			return true, nil
 		}
-		return found, err
+		return false, err
 	}
 
-	return found, nil
+	return false, nil
 }
 
 func (s updateUserService) ValidateEmailUniqueness(c *gin.Context, user *model.User, email string) (bool, error) {
@@ -64,15 +64,15 @@ func (s updateUserService) ValidateEmailUniqueness(c *gin.Context, user *model.U
 		query.User.ID.Neq(user.ID),
 	}
 
-	_, found, err := s.rdb.GetByCond(ctx, conds...)
+	_, err := s.rdb.GetByCond(ctx, conds...)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return !found, nil
+			return true, nil
 		}
-		return found, err
+		return false, err
 	}
 
-	return found, nil
+	return false, nil
 }
 
 func (s updateUserService) UpdateUser(c *gin.Context, user *model.User) error {

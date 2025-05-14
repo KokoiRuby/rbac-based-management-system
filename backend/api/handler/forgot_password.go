@@ -125,7 +125,7 @@ func (handler *ForgotPasswordHandler) ForgotConfirm(c *gin.Context) {
 	}
 
 	user.Password = hashedPassword
-	err = handler.ForgotPasswordService.UpdateUser(c, &user)
+	err = handler.ForgotPasswordService.UpdateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to update user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to reset password.")

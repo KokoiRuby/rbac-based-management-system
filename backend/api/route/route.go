@@ -14,8 +14,8 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 
 	// Probes
 	probeRouter := g.Group("")
-	NewReadinessRouter(probeRouter)
-	NewLivenessRouter(probeRouter)
+	NewReadinessRouter(probeRouter) // TODO: admin
+	NewLivenessRouter(probeRouter)  // TODO: admin
 
 	// Public APIs
 	publicRouter := g.Group("")
@@ -32,4 +32,5 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewUploadAvatarRouter(cfg, db, objStore, userGroup)
 	NewUpdateUserRouter(cfg, db, cache, userGroup)
 	NewUserProfileRouter(cfg, db, userGroup)
+	NewListUsersRouter(cfg, db, userGroup) // TODO: admin
 }

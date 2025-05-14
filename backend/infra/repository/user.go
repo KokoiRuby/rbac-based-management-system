@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/infra/repository/query"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 )
 
@@ -28,27 +30,65 @@ func (u userRDB) Create(c context.Context, user *model.User) error {
 	return nil
 }
 
-func (u userRDB) List(c context.Context) ([]model.User, error) {
-	//TODO implement me
-	panic("implement me")
+func (u userRDB) ListByCond(c context.Context, opt model.QueryOptions) ([]*model.User, int64, error) {
+
+	// Pagination
+	page := opt.Page
+	limit := opt.Limit
+	offset := (page - 1) * limit
+
+	// Order
+	var order field.Expr
+	if opt.Order {
+		order = query.User.CreatedAt.Desc()
+	} else {
+		order = query.User.CreatedAt.Asc()
+	}
+
+	queryBuilder := query.User.Where(
+		// Fuzzy AND
+		query.User.Username.Like(fmt.Sprintf("%%%s%%", opt.Likes["username"].(string))),
+		query.User.Email.Like(fmt.Sprintf("%%%s%%", opt.Likes["email"].(string))),
+	)
+
+	query.SetDefault(u.rdb)
+	users, err := queryBuilder.
+		Debug().
+		Order(order).
+		Offset(offset).
+		Limit(limit).
+		Find()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	cnt, err := queryBuilder.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, cnt, nil
 }
 
-func (u userRDB) GetByID(c context.Context, id uint) (model.User, error) {
+func (u userRDB) GetByCond(c context.Context, conds ...gen.Condition) (*model.User, error) {
 	query.SetDefault(u.rdb)
-	user, err := query.User.WithContext(c).Where(query.User.ID.Eq(id)).Take()
+	user, err := query.User.Debug().WithContext(c).Preload(query.User.RoleList).Where(conds...).Take()
 	if err != nil {
-		return model.User{}, err
+		return nil, err
 	}
-	return *user, nil
+	return user, nil
 }
 
-func (u userRDB) GetByEmail(c context.Context, email string) (model.User, error) {
+func (u userRDB) GetByID(c context.Context, id uint) (*model.User, error) {
 	query.SetDefault(u.rdb)
-	user, err := query.User.WithContext(c).Where(query.User.Email.Eq(email)).Take()
-	if err != nil {
-		return model.User{}, err
-	}
-	return *user, nil
+	cond := query.User.ID.Eq(id)
+	return u.GetByCond(c, cond)
+}
+
+func (u userRDB) GetByEmail(c context.Context, email string) (*model.User, error) {
+	query.SetDefault(u.rdb)
+	cond := query.User.Email.Eq(email)
+	return u.GetByCond(c, cond)
 }
 
 func (u userRDB) Update(c context.Context, user *model.User) error {
@@ -58,14 +98,4 @@ func (u userRDB) Update(c context.Context, user *model.User) error {
 		return err
 	}
 	return nil
-}
-
-func (u userRDB) GetByCond(c context.Context, conds ...gen.Condition) (model.User, bool, error) {
-	query.SetDefault(u.rdb)
-	user, err := query.User.WithContext(c).Where(conds...).Take()
-	if err != nil {
-		return model.User{}, false, err
-	}
-
-	return *user, true, nil
 }

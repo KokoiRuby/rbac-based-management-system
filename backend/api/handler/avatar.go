@@ -88,7 +88,7 @@ func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 	}
 
 	user.Avatar = fileHeader.Filename
-	err = handler.AvatarService.UpdateUser(c, &user)
+	err = handler.AvatarService.UpdateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to update user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")

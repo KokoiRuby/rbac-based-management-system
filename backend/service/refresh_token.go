@@ -26,7 +26,7 @@ func (s refreshTokenService) ExtractIDFromToken(token string) (uint, error) {
 	return utils.ExtractIDFromToken(token)
 }
 
-func (s refreshTokenService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
+func (s refreshTokenService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByID(ctx, id)

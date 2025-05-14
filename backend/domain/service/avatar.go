@@ -10,6 +10,6 @@ import (
 type AvatarService interface {
 	UploadToLocal(c *gin.Context, baseDir string, fileHeader *multipart.FileHeader) error
 	UploadToS3(c *gin.Context, cfg runtime.AWS, dir string, fileHeader *multipart.FileHeader) error
-	GetUserByID(c *gin.Context, id uint) (model.User, error)
+	GetUserByID(c *gin.Context, id uint) (*model.User, error)
 	UpdateUser(c *gin.Context, user *model.User) error
 }

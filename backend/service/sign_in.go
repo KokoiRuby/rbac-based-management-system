@@ -24,7 +24,7 @@ func NewSigninService(rdb service.UserRDB, cache service.RedisCache, timeout tim
 	}
 }
 
-func (s signinService) GetUserByEmail(c *gin.Context, email string) (model.User, error) {
+func (s signinService) GetUserByEmail(c *gin.Context, email string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.userRDB.GetByEmail(ctx, email)

@@ -10,7 +10,7 @@ import (
 
 type SignupService interface {
 	CreateUser(c *gin.Context, user *model.User) error
-	GetUserByEmail(c *gin.Context, email string) (model.User, error)
+	GetUserByEmail(c *gin.Context, email string) (*model.User, error)
 	SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPConfig) error
 	CreateConfirmToken(req *model.SignupConfirmRequest, cfg runtime.JWT) (confirmToken string, err error)
 	Confirm(token string) (*model.SignupRequest, error)

@@ -53,7 +53,7 @@ func (handler *ResetPasswordHandler) Reset(c *gin.Context) {
 	}
 
 	user.Password = hashedNewPassword
-	err = handler.ResetPasswordService.UpdateUser(c, &user)
+	err = handler.ResetPasswordService.UpdateUser(c, user)
 	if err != nil {
 		zap.S().Errorf("failed to update user: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to reset password.")

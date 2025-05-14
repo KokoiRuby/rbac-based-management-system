@@ -8,20 +8,20 @@ import (
 	"time"
 )
 
-type userProfileService struct {
+type listUsersService struct {
 	rdb            service.UserRDB
 	contextTimeout time.Duration
 }
 
-func NewUserProfileService(rdb service.UserRDB, contextTimeout time.Duration) service.UserProfileService {
-	return &updateUserService{
+func NewListUsersService(rdb service.UserRDB, contextTimeout time.Duration) service.ListUsersService {
+	return &listUsersService{
 		rdb:            rdb,
 		contextTimeout: contextTimeout,
 	}
 }
 
-func (s userProfileService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
+func (s listUsersService) ListUsers(c *gin.Context, opt model.QueryOptions) ([]*model.User, int64, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
-	return s.rdb.GetByID(ctx, id)
+	return s.rdb.ListByCond(ctx, opt)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type ForgotPasswordService interface {
-	GetUserByEmail(c *gin.Context, email string) (model.User, error)
+	GetUserByEmail(c *gin.Context, email string) (*model.User, error)
 	CreateConfirmToken(user *model.ForgotPasswordRequest, cfg runtime.JWT) (confirmToken string, err error)
 	SendConfirmEmail(msg *gomail.Message, cfg runtime.SMTPConfig) error
 	Confirm(token string) (string, error)

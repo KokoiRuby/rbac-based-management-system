@@ -42,3 +42,5 @@ func AuthNMiddleware(c *gin.Context) {
 	c.Set("claims", claims)
 	c.Next()
 }
+
+// TODO: Admin AuthN

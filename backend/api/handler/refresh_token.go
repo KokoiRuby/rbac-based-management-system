@@ -40,7 +40,7 @@ func (handler *RefreshTokenHandler) Refresh(c *gin.Context) {
 	}
 
 	accessToken, err := handler.RefreshTokenService.CreateAccessToken(
-		&user,
+		user,
 		handler.RuntimeConfig.JWT)
 	if err != nil {
 		zap.S().Errorf("failed to create access token: %v", err)
@@ -48,7 +48,7 @@ func (handler *RefreshTokenHandler) Refresh(c *gin.Context) {
 	}
 
 	refreshToken, err := handler.RefreshTokenService.CreateRefreshToken(
-		&user,
+		user,
 		handler.RuntimeConfig.JWT)
 	if err != nil {
 		zap.S().Errorf("failed to create refresh token: %v", err)

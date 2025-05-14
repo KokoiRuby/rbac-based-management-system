@@ -6,6 +6,6 @@ import (
 )
 
 type ResetPasswordService interface {
-	GetByID(c *gin.Context, id uint) (model.User, error)
+	GetByID(c *gin.Context, id uint) (*model.User, error)
 	UpdateUser(c *gin.Context, user *model.User) error
 }
