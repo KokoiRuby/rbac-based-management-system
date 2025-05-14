@@ -8,13 +8,16 @@ import (
 	"github.com/KokoiRuby/rbac-based-management-system/backend/service"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"time"
 )
 
-func NewUploadAvatarRouter(cfg *config.RuntimeConfig, objStore *s3.Client, group *gin.RouterGroup) {
-	repo := repository.NewAvatarRepository(objStore)
+func NewUploadAvatarRouter(cfg *config.RuntimeConfig, db *gorm.DB, objStore *s3.Client, group *gin.RouterGroup) {
+	userRepo := repository.NewUserRepository(db)
+	avatarRepo := repository.NewAvatarRepository(objStore)
+
 	h := handler.UploadAvatarHandler{
-		AvatarService: service.NewAvatarService(repo, time.Duration(cfg.Gin.Timeout)),
+		AvatarService: service.NewAvatarService(userRepo, avatarRepo, time.Duration(cfg.Gin.Timeout)),
 		RuntimeConfig: cfg,
 	}
 	group.POST("/upload/avatar",

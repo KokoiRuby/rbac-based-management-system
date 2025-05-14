@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
+	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/model"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
@@ -17,12 +18,14 @@ import (
 )
 
 type AvatarService struct {
+	rdb            service.UserRDB
 	objStore       service.AvatarObjectStorage
 	contextTimeout time.Duration
 }
 
-func NewAvatarService(objStore service.AvatarObjectStorage, timeout time.Duration) service.AvatarService {
+func NewAvatarService(rdb service.UserRDB, objStore service.AvatarObjectStorage, timeout time.Duration) service.AvatarService {
 	return &AvatarService{
+		rdb:            rdb,
 		objStore:       objStore,
 		contextTimeout: timeout,
 	}
@@ -42,6 +45,7 @@ func (s AvatarService) UploadToS3(c *gin.Context, cfg runtime.AWS, dir string, f
 	return s.objStore.Put(ctx, cfg.S3.Bucket, key, toUpload)
 }
 
+// UploadToLocal TODO: Shift to handler layer?
 func (s AvatarService) UploadToLocal(c *gin.Context, baseDir string, fileHeader *multipart.FileHeader) error {
 
 	originalFilename := fileHeader.Filename
@@ -88,4 +92,16 @@ func (s AvatarService) UploadToLocal(c *gin.Context, baseDir string, fileHeader 
 	}
 
 	return nil
+}
+
+func (s AvatarService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.rdb.GetByID(ctx, id)
+}
+
+func (s AvatarService) UpdateUser(c *gin.Context, user *model.User) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.rdb.Update(ctx, user)
 }

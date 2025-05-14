@@ -31,7 +31,7 @@ func (handler *UpdateUserHandler) Update(c *gin.Context) {
 	}
 
 	id := claims.(*utils.CustomClaims).UserID
-	user, err := handler.UpdateUserService.GetByID(c, id)
+	user, err := handler.UpdateUserService.GetUserByID(c, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.FailWithMsg(c, http.StatusNotFound, "User not found.")
@@ -143,7 +143,7 @@ func (handler *UpdateUserHandler) UpdateConfirm(c *gin.Context) {
 	}
 
 	id := req.UserID
-	user, err := handler.UpdateUserService.GetByID(c, id)
+	user, err := handler.UpdateUserService.GetUserByID(c, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.FailWithMsg(c, http.StatusNotFound, "User not found.")

@@ -29,7 +29,7 @@ func NewUpdateUserService(rdb service.UserRDB, cache service.RedisCache, context
 	}
 }
 
-func (s updateUserService) GetByID(c *gin.Context, id uint) (model.User, error) {
+func (s updateUserService) GetUserByID(c *gin.Context, id uint) (model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByID(ctx, id)

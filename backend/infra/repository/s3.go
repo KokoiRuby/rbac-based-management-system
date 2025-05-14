@@ -8,6 +8,7 @@ import (
 )
 
 type avatarS3 struct {
+	userRDB
 	client *s3.Client
 }
 

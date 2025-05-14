@@ -8,7 +8,7 @@ import (
 )
 
 type UpdateUserService interface {
-	GetByID(c *gin.Context, id uint) (model.User, error)
+	GetUserByID(c *gin.Context, id uint) (model.User, error)
 	UpdateUser(c *gin.Context, user *model.User) error
 	ValidateUserNameUniqueness(c *gin.Context, user *model.User, username string) (bool, error)
 	ValidateEmailUniqueness(c *gin.Context, user *model.User, email string) (bool, error)

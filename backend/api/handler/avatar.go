@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/domain/service"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"net/http"
 	"path"
 	"path/filepath"
@@ -21,7 +23,6 @@ type UploadAvatarHandler struct {
 	RuntimeConfig *config.RuntimeConfig
 }
 
-// Upload TODO: To AWS S3
 func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok {
@@ -29,6 +30,8 @@ func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
 		return
 	}
+
+	id := claims.(*utils.CustomClaims).UserID
 	email := claims.(*utils.CustomClaims).Email
 
 	// TODO: Left-shift-able to frontend
@@ -51,7 +54,11 @@ func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	// To local
+	// TODO: Left-shift-able to frontend
+	// TODO: thumbnail before persistence to save bandwidth
+	// TODO: thumbnail can also be cached in browser cache
+
+	// To local storage
 	baseDir := path.Join("/app/static/uploads", handler.RuntimeConfig.Upload.Avatar.Dir, email)
 	err = handler.AvatarService.UploadToLocal(c, baseDir, fileHeader)
 	if err != nil {
@@ -65,6 +72,26 @@ func (handler *UploadAvatarHandler) Upload(c *gin.Context) {
 	if err != nil {
 		zap.S().Errorf("failed to upload avatar to s3: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar to s3.")
+		return
+	}
+
+	// S3 key to db
+	user, err := handler.AvatarService.GetUserByID(c, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.FailWithMsg(c, http.StatusNotFound, "User not found.")
+			return
+		}
+		zap.S().Errorf("failed to get user by id: %v", err)
+		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
+		return
+	}
+
+	user.Avatar = fileHeader.Filename
+	err = handler.AvatarService.UpdateUser(c, &user)
+	if err != nil {
+		zap.S().Errorf("failed to update user: %v", err)
+		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to upload avatar.")
 		return
 	}
 
