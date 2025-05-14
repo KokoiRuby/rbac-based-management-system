@@ -8,26 +8,32 @@ import (
 	"time"
 )
 
-type closeUserService struct {
+type deleteUserService struct {
 	rdb            service.UserRDB
 	contextTimeout time.Duration
 }
 
-func NewCloseUserService(rdb service.UserRDB, contextTimeout time.Duration) service.CloseUserService {
-	return &closeUserService{
+func NewDeleteUserService(rdb service.UserRDB, contextTimeout time.Duration) service.DeleteUserService {
+	return &deleteUserService{
 		rdb:            rdb,
 		contextTimeout: contextTimeout,
 	}
 }
 
-func (s closeUserService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
+func (s deleteUserService) GetUserByID(c *gin.Context, id uint) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.GetByID(ctx, id)
 }
 
-func (s closeUserService) DeleteByID(c *gin.Context, id uint) (int64, error) {
+func (s deleteUserService) DeleteByID(c *gin.Context, id uint) (int64, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
 	defer cancel()
 	return s.rdb.DeleteByID(ctx, id)
+}
+
+func (s deleteUserService) DeleteUsers(c *gin.Context, ids []uint) (int64, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout*time.Second)
+	defer cancel()
+	return s.rdb.DeleteByIDs(ctx, ids)
 }

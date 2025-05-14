@@ -48,7 +48,7 @@ func (handler *CloseUserHandler) Close(c *gin.Context) {
 		return
 	}
 
-	err = handler.CloseUserService.DeleteByID(c, id)
+	_, err = handler.CloseUserService.DeleteByID(c, id)
 	if err != nil {
 		zap.S().Errorf("failed to delete user by id: %v", err)
 		utils.FailWithMsg(c, http.StatusInternalServerError, "Failed to close user.")

@@ -102,16 +102,21 @@ func (u userRDB) Update(c context.Context, user *model.User) error {
 	return nil
 }
 
-func (u userRDB) DeleteByCond(c context.Context, conds ...gen.Condition) error {
+func (u userRDB) DeleteByCond(c context.Context, conds ...gen.Condition) (int64, error) {
 	query.SetDefault(u.rdb)
-	_, err := query.User.Where(conds...).Delete()
+	result, err := query.User.Where(conds...).Delete()
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return result.RowsAffected, nil
 }
 
-func (u userRDB) DeleteByID(c context.Context, id uint) error {
+func (u userRDB) DeleteByID(c context.Context, id uint) (int64, error) {
 	cond := query.User.ID.Eq(id)
+	return u.DeleteByCond(c, cond)
+}
+
+func (u userRDB) DeleteByIDs(c context.Context, ids []uint) (int64, error) {
+	cond := query.User.ID.In(ids...)
 	return u.DeleteByCond(c, cond)
 }

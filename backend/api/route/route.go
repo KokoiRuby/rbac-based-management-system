@@ -34,6 +34,5 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewUserProfileRouter(cfg, db, userGroup)
 	NewListUsersRouter(cfg, db, userGroup) // TODO: admin
 	NewCloseUserRouter(cfg, db, userGroup)
-	//NewDeleteUserRouter(cfg, db, userGroup) // TODO: admin
-
+	NewDeleteUserRouter(cfg, db, userGroup) // TODO: admin
 }
