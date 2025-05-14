@@ -14,3 +14,11 @@ type User struct {
 	// https://gorm.io/docs/many_to_many.html
 	RoleList []Role `gorm:"many2many:user_role_bindings;joinForeignKey:UserID;joinReferences:RoleID" json:"role_list"`
 }
+
+func (u User) GetRoleList() []uint {
+	var roleList []uint
+	for _, role := range u.RoleList {
+		roleList = append(roleList, role.ID)
+	}
+	return roleList
+}
