@@ -12,13 +12,9 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	// Statics
 	g.Static("/uploads", "./static/uploads")
 
-	// Probes
-	probeRouter := g.Group("")
-	NewReadinessRouter(probeRouter) // TODO: admin
-	NewLivenessRouter(probeRouter)  // TODO: admin
-
 	// Public APIs
 	publicRouter := g.Group("")
+	//NewCreateAdminRouter(cfg, db, publicRouter)
 	NewSignupRouter(cfg, db, cache, publicRouter)
 	NewSigninRouter(cfg, db, cache, publicRouter)
 	NewRefreshTokenRouter(cfg, db, publicRouter)
@@ -26,6 +22,10 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewForgotPasswordRouter(cfg, db, cache, publicRouter)
 
 	// Protected APIs
+	probeRouter := g.Group("")
+	NewReadinessRouter(probeRouter) // TODO: admin
+	NewLivenessRouter(probeRouter)  // TODO: admin
+
 	protectedRouter := g.Group("v1")
 	userGroup := protectedRouter.Group("user")
 	NewResetPasswordRouter(cfg, db, userGroup)
@@ -33,4 +33,7 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewUpdateUserRouter(cfg, db, cache, userGroup)
 	NewUserProfileRouter(cfg, db, userGroup)
 	NewListUsersRouter(cfg, db, userGroup) // TODO: admin
+	NewCloseUserRouter(cfg, db, userGroup)
+	//NewDeleteUserRouter(cfg, db, userGroup) // TODO: admin
+
 }

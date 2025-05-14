@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO: GORM Gen query instead of gorm.DB
+
 type userRDB struct {
 	rdb *gorm.DB
 }
@@ -98,4 +100,18 @@ func (u userRDB) Update(c context.Context, user *model.User) error {
 		return err
 	}
 	return nil
+}
+
+func (u userRDB) DeleteByCond(c context.Context, conds ...gen.Condition) error {
+	query.SetDefault(u.rdb)
+	_, err := query.User.Where(conds...).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u userRDB) DeleteByID(c context.Context, id uint) error {
+	cond := query.User.ID.Eq(id)
+	return u.DeleteByCond(c, cond)
 }
