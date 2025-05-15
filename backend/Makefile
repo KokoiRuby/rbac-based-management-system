@@ -1,5 +1,6 @@
 PROJECT_NAME = rbac-mgmt-system
 DOCKER_COMPOSE = docker compose -f ./docker/docker-compose.yaml -p $(PROJECT_NAME)
+USER = tutorj
 
 .PHONY: build
 build:
@@ -16,7 +17,9 @@ down:
 
 .PHONY: tidy
 tidy:
+	sudo chown -R $(USER):$(USER) ./docker/mysql/data
 	go mod tidy
+	sudo chown -R 1001:1001 ./docker/mysql/data
 
 .PHONY: run
 run:
@@ -28,7 +31,7 @@ debug:
 
 .PHONY: migrate
 migrate:
-	if [ -z "$$ENV" ]; then export ENV="dev"; fi && go run cmd/main.go -m
+	if [ -z "$$ENV" ]; then export ENV="dev"; fi && if [ -z "$$CONSUL_HTTP_ADDR" ]; then export CONSUL_HTTP_ADDR="http://localhost:8500"; fi && go run cmd/main.go -m
 
 .PHONY: ssl
 ssl:

@@ -14,6 +14,7 @@ type Menu struct {
 	ParentMenu   *Menu  `gorm:"foreignKey:ParentMenuID" json:"-"`
 	Children     []Menu `gorm:"foreignKey:ParentMenuID" json:"children"`
 	Sort         int    `json:"sort"`
+	Enable       bool   `json:"enable"`
 
 	Meta `gorm:"embedded" json:"meta"`
 

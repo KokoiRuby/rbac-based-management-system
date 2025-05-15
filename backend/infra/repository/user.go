@@ -56,6 +56,8 @@ func (u userRDB) ListByCond(c context.Context, opt model.QueryOptions) ([]*model
 	query.SetDefault(u.rdb)
 	users, err := queryBuilder.
 		Debug().
+		WithContext(c).
+		Preload(query.User.RoleList).
 		Order(order).
 		Offset(offset).
 		Limit(limit).

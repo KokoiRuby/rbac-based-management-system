@@ -18,7 +18,6 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewSignupRouter(cfg, db, cache, publicRouter)
 	NewSigninRouter(cfg, db, cache, publicRouter)
 	NewRefreshTokenRouter(cfg, db, publicRouter)
-	NewSignoutRouter(cfg, cache, publicRouter)
 	NewForgotPasswordRouter(cfg, db, cache, publicRouter)
 
 	// Protected APIs
@@ -28,6 +27,7 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 
 	protectedRouter := g.Group("v1")
 	userGroup := protectedRouter.Group("user")
+	NewSignoutRouter(cfg, cache, userGroup)
 	NewResetPasswordRouter(cfg, db, userGroup)
 	NewUploadAvatarRouter(cfg, db, objStore, userGroup)
 	NewUpdateUserRouter(cfg, db, cache, userGroup)
@@ -35,4 +35,8 @@ func Setup(cfg *config.RuntimeConfig, db *gorm.DB, cache *redis.Client, objStore
 	NewListUsersRouter(cfg, db, userGroup) // TODO: admin
 	NewCloseUserRouter(cfg, db, userGroup)
 	NewDeleteUserRouter(cfg, db, userGroup) // TODO: admin
+
+	menuGroup := protectedRouter.Group("menu")
+	NewCreateMenuRouter(cfg, db, menuGroup)
+	NewListMenusRouter(cfg, db, menuGroup)
 }

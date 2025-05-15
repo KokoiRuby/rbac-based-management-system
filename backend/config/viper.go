@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/KokoiRuby/rbac-based-management-system/backend/config/runtime"
 	"github.com/fsnotify/fsnotify"
 	consulapi "github.com/hashicorp/consul/api"
@@ -38,6 +39,8 @@ func NewRuntimeConfig() *RuntimeConfig {
 
 	cfg := &RuntimeConfig{}
 	Parse(cfg)
+
+	fmt.Println(cfg)
 
 	client := NewConsulClient()
 	kvPair, _, err := client.KV().Get(backendConfigKey, nil)

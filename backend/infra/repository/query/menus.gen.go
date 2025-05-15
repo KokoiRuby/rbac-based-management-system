@@ -34,6 +34,7 @@ func newMenu(db *gorm.DB, opts ...gen.DOOption) menu {
 	_menu.Component = field.NewString(tableName, "component")
 	_menu.ParentMenuID = field.NewUint(tableName, "parent_menu_id")
 	_menu.Sort = field.NewInt(tableName, "sort")
+	_menu.Enable = field.NewBool(tableName, "enable")
 	_menu.MetaIcon = field.NewString(tableName, "icon")
 	_menu.MetaTitle = field.NewString(tableName, "title")
 	_menu.Children = menuHasManyChildren{
@@ -75,6 +76,7 @@ type menu struct {
 	Component    field.String
 	ParentMenuID field.Uint
 	Sort         field.Int
+	Enable       field.Bool
 	MetaIcon     field.String
 	MetaTitle    field.String
 	Children     menuHasManyChildren
@@ -104,6 +106,7 @@ func (m *menu) updateTableName(table string) *menu {
 	m.Component = field.NewString(table, "component")
 	m.ParentMenuID = field.NewUint(table, "parent_menu_id")
 	m.Sort = field.NewInt(table, "sort")
+	m.Enable = field.NewBool(table, "enable")
 	m.MetaIcon = field.NewString(table, "icon")
 	m.MetaTitle = field.NewString(table, "title")
 
@@ -122,7 +125,7 @@ func (m *menu) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (m *menu) fillFieldMap() {
-	m.fieldMap = make(map[string]field.Expr, 12)
+	m.fieldMap = make(map[string]field.Expr, 13)
 	m.fieldMap["id"] = m.ID
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
@@ -131,6 +134,7 @@ func (m *menu) fillFieldMap() {
 	m.fieldMap["component"] = m.Component
 	m.fieldMap["parent_menu_id"] = m.ParentMenuID
 	m.fieldMap["sort"] = m.Sort
+	m.fieldMap["enable"] = m.Enable
 	m.fieldMap["icon"] = m.MetaIcon
 	m.fieldMap["title"] = m.MetaTitle
 
